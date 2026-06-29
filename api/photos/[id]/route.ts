@@ -1,4 +1,4 @@
-import { photos, initMockData, initMockPhotos } from '../../store';
+import { photos, initMockData, initMockPhotos } from '../../../store';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   await initMockData();
