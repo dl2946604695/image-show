@@ -30,7 +30,9 @@
     }
   },
   "include": [
-    "src",
-    "api"
+    "src"
+  ],
+  "exclude": [
+    "src/api"
   ]
 }
