@@ -33,6 +33,7 @@
     "src"
   ],
   "exclude": [
-    "src/api"
+    "src/api",
+    "api"
   ]
 }
