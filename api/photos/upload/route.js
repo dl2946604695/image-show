@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { photos, users, initMockData, initMockPhotos } from '../../store.js';
 import { verifyToken } from '../../jwt.js';
 
-export async function POST(request) {
+export async function onRequestPost({ request }) {
   await initMockData();
   await initMockPhotos();
   

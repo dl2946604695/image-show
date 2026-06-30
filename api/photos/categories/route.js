@@ -1,6 +1,6 @@
 import { categories, initMockData } from '../../store.js';
 
-export async function GET(request) {
+export async function onRequestGet() {
   await initMockData();
   
   return new Response(JSON.stringify({

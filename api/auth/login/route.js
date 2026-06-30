@@ -1,7 +1,7 @@
 import { comparePassword, generateToken } from '../jwt.js';
 import { users, initMockData } from '../store.js';
 
-export async function POST(request) {
+export async function onRequestPost({ request }) {
   await initMockData();
   
   const { email, password } = await request.json();

@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { users, initMockData } from '../store.js';
 import { generateToken, hashPassword } from '../jwt.js';
 
-export async function POST(request) {
+export async function onRequestPost({ request }) {
   await initMockData();
   
   const { email, password, name } = await request.json();
