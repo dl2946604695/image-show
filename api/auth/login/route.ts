@@ -1,6 +1,5 @@
-import { comparePassword } from '../../jwt';
-import { users, initMockData } from '../../store';
-import { generateToken } from '../../jwt';
+import { comparePassword, generateToken } from '../jwt';
+import { users, initMockData } from '../store';
 
 export async function POST(request: Request) {
   await initMockData();

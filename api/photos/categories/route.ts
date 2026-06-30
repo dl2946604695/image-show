@@ -1,4 +1,4 @@
-import { categories, initMockData } from '../../../store';
+import { categories, initMockData } from '../../store';
 
 export async function GET(request: Request) {
   await initMockData();

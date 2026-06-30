@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
-import { users, initMockData } from '../../store';
-import { generateToken, hashPassword } from '../../jwt';
+import { users, initMockData } from '../store';
+import { generateToken, hashPassword } from '../jwt';
 
 export async function POST(request: Request) {
   await initMockData();
