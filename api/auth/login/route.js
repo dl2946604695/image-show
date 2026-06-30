@@ -1,7 +1,7 @@
-import { comparePassword, generateToken } from '../jwt';
-import { users, initMockData } from '../store';
+import { comparePassword, generateToken } from '../jwt.js';
+import { users, initMockData } from '../store.js';
 
-export async function POST(request: Request) {
+export async function POST(request) {
   await initMockData();
   
   const { email, password } = await request.json();

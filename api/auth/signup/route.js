@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto';
-import { users, initMockData } from '../store';
-import { generateToken, hashPassword } from '../jwt';
+import { users, initMockData } from '../store.js';
+import { generateToken, hashPassword } from '../jwt.js';
 
-export async function POST(request: Request) {
+export async function POST(request) {
   await initMockData();
   
   const { email, password, name } = await request.json();

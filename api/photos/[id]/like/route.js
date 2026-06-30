@@ -1,7 +1,7 @@
-import { photos, users, initMockData, initMockPhotos } from '../../../store';
-import { verifyToken } from '../../../jwt';
+import { photos, users, initMockData, initMockPhotos } from '../../store.js';
+import { verifyToken } from '../../jwt.js';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request, { params }) {
   await initMockData();
   await initMockPhotos();
   

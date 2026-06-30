@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto';
-import { photos, users, initMockData, initMockPhotos } from '../../store';
-import { verifyToken } from '../../jwt';
+import { photos, users, initMockData, initMockPhotos } from '../../store.js';
+import { verifyToken } from '../../jwt.js';
 
-export async function POST(request: Request) {
+export async function POST(request) {
   await initMockData();
   await initMockPhotos();
   
@@ -33,10 +33,10 @@ export async function POST(request: Request) {
   }
 
   const formData = await request.formData();
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string || '';
-  const category = formData.get('category') as string;
-  const file = formData.get('file') as File | null;
+  const title = formData.get('title');
+  const description = formData.get('description') || '';
+  const category = formData.get('category');
+  const file = formData.get('file');
 
   if (!title || !file || !category) {
     return new Response(JSON.stringify({ error: '请填写完整信息' }), {

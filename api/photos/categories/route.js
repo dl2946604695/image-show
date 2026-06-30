@@ -1,6 +1,6 @@
-import { categories, initMockData } from '../../store';
+import { categories, initMockData } from '../../store.js';
 
-export async function GET(request: Request) {
+export async function GET(request) {
   await initMockData();
   
   return new Response(JSON.stringify({
