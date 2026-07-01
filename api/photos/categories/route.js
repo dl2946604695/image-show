@@ -1,6 +1,6 @@
-import { categories, initMockData } from '../../store.js';
+import { categories, initMockData } from '../store.js';
 
-export async function onRequestGet() {
+export async function GET() {
   await initMockData();
   
   return new Response(JSON.stringify({

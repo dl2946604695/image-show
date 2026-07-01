@@ -1,6 +1,6 @@
 import { photos, initMockData, initMockPhotos } from '../../store.js';
 
-export async function onRequestGet({ params }) {
+export async function GET(request, { params }) {
   await initMockData();
   await initMockPhotos();
   

@@ -1,8 +1,7 @@
-import { randomUUID } from 'crypto';
+import { hashPassword, generateToken } from '../jwt.js';
 import { users, initMockData } from '../store.js';
-import { generateToken, hashPassword } from '../jwt.js';
 
-export async function onRequestPost({ request }) {
+export async function POST(request) {
   await initMockData();
   
   const { email, password, name } = await request.json();
@@ -14,31 +13,24 @@ export async function onRequestPost({ request }) {
     });
   }
 
-  if (password.length < 6) {
-    return new Response(JSON.stringify({ error: '密码长度至少为6位' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
   const existingUser = users.find(u => u.email === email);
   if (existingUser) {
     return new Response(JSON.stringify({ error: '该邮箱已被注册' }), {
-      status: 409,
+      status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
   const hashedPassword = await hashPassword(password);
   const newUser = {
-    id: randomUUID(),
+    id: Date.now().toString(),
     email,
     name,
     password: hashedPassword,
     createdAt: new Date().toISOString(),
   };
-
   users.push(newUser);
+
   const token = generateToken(newUser.id);
 
   return new Response(JSON.stringify({

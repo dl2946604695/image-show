@@ -1,7 +1,7 @@
 import { photos, users, initMockData, initMockPhotos } from '../../store.js';
 import { verifyToken } from '../../jwt.js';
 
-export async function onRequestPut({ request, params }) {
+export async function PUT(request, { params }) {
   await initMockData();
   await initMockPhotos();
   
