@@ -19,6 +19,10 @@ export function PhotoDetail() {
   const prevPhoto = photoIndex > 0 ? photos[photoIndex - 1] : null;
   const nextPhoto = photoIndex < photos.length - 1 ? photos[photoIndex + 1] : null;
 
+  const handleClose = () => {
+    navigate('/', { replace: true });
+  };
+
   const fetchPhoto = useCallback(async () => {
     if (!id) return;
 
@@ -71,7 +75,7 @@ export function PhotoDetail() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        navigate(-1);
+        handleClose();
       } else if (e.key === 'ArrowLeft' && prevPhoto) {
         navigate(`/photo/${prevPhoto.id}`);
       } else if (e.key === 'ArrowRight' && nextPhoto) {
@@ -81,7 +85,7 @@ export function PhotoDetail() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate, prevPhoto, nextPhoto]);
+  }, [navigate, prevPhoto, nextPhoto, handleClose]);
 
   const handleLike = async () => {
     if (!photo) return;
@@ -119,7 +123,7 @@ export function PhotoDetail() {
         <div className="text-center">
           <p className="text-text-secondary mb-4">{error || '照片不存在'}</p>
           <button
-            onClick={() => navigate(-1)}
+            onClick={handleClose}
             className="text-accent hover:text-accent/80 transition-colors"
           >
             返回画廊
@@ -132,7 +136,7 @@ export function PhotoDetail() {
   return (
     <div className="detail-modal-overlay">
       <button
-        onClick={() => navigate(-1)}
+        onClick={handleClose}
         className="detail-close-btn"
       >
         <X className="w-5 h-5" />
