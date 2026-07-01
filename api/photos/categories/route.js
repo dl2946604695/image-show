@@ -1,13 +1,10 @@
 import { categories, initMockData } from '../store.js';
 
-export async function GET() {
+export default async function handler(req, res) {
   await initMockData();
   
-  return new Response(JSON.stringify({
+  res.status(200).json({
     success: true,
     data: categories,
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
   });
 }

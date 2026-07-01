@@ -1,24 +1,18 @@
 import { photos, initMockData, initMockPhotos } from '../../store.js';
 
-export async function GET(request, { params }) {
+export default async function handler(req, res) {
   await initMockData();
   await initMockPhotos();
   
-  const { id } = params;
+  const { id } = req.query;
   const photo = photos.find(p => p.id === id);
 
   if (!photo) {
-    return new Response(JSON.stringify({ error: '照片不存在' }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(404).json({ error: '照片不存在' });
   }
 
-  return new Response(JSON.stringify({
+  res.status(200).json({
     success: true,
     data: photo,
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
   });
 }

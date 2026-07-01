@@ -1,24 +1,22 @@
 import { hashPassword, generateToken } from '../jwt.js';
 import { users, initMockData } from '../store.js';
 
-export async function POST(request) {
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   await initMockData();
   
-  const { email, password, name } = await request.json();
+  const { email, password, name } = req.body;
 
   if (!email || !password || !name) {
-    return new Response(JSON.stringify({ error: '请填写完整信息' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(400).json({ error: '请填写完整信息' });
   }
 
   const existingUser = users.find(u => u.email === email);
   if (existingUser) {
-    return new Response(JSON.stringify({ error: '该邮箱已被注册' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(400).json({ error: '该邮箱已被注册' });
   }
 
   const hashedPassword = await hashPassword(password);
@@ -33,7 +31,7 @@ export async function POST(request) {
 
   const token = generateToken(newUser.id);
 
-  return new Response(JSON.stringify({
+  res.status(201).json({
     success: true,
     data: {
       user: {
@@ -43,8 +41,5 @@ export async function POST(request) {
       },
       token,
     },
-  }), {
-    status: 201,
-    headers: { 'Content-Type': 'application/json' },
   });
 }

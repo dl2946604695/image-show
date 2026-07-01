@@ -1,11 +1,10 @@
 import { photos, categories, initMockData, initMockPhotos } from '../store.js';
 
-export async function GET(request) {
+export default async function handler(req, res) {
   await initMockData();
   await initMockPhotos();
   
-  const url = new URL(request.url);
-  const category = url.searchParams.get('category');
+  const category = req.query.category;
 
   let filteredPhotos = photos;
   if (category) {
@@ -14,11 +13,8 @@ export async function GET(request) {
 
   filteredPhotos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  return new Response(JSON.stringify({
+  res.status(200).json({
     success: true,
     data: filteredPhotos,
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
   });
 }
