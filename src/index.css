@@ -1409,3 +1409,202 @@ h1, h2, h3, h4, h5, h6 {
 .text-balance {
   text-wrap: balance;
 }
+
+@media (max-width: 768px) {
+  .nav-bar-inner {
+    height: 52px;
+  }
+
+  .nav-logo-text {
+    font-size: 15px;
+  }
+
+  .nav-logo-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav-logo-icon-inner {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nav-menu-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .hero-section {
+    padding: 80px 0 40px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
+    margin-bottom: 12px;
+  }
+
+  .hero-subtitle {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .hero-stats {
+    gap: 24px;
+  }
+
+  .hero-stat-number {
+    font-size: 18px;
+  }
+
+  .hero-stat-label {
+    font-size: 11px;
+  }
+
+  .category-filter {
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .category-pill {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  .login-card {
+    padding: 32px 20px;
+    max-width: 340px;
+  }
+
+  .login-card-header {
+    margin-bottom: 24px;
+  }
+
+  .login-logo {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+  }
+
+  .login-title {
+    font-size: 18px;
+  }
+
+  .login-subtitle {
+    font-size: 12px;
+  }
+
+  .login-input {
+    padding: 12px 14px;
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .login-btn {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .login-divider {
+    margin: 20px 0;
+  }
+
+  .login-footer-text {
+    font-size: 10px;
+    margin-top: 16px;
+  }
+
+  .login-back-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+    margin-top: 12px;
+  }
+
+  .detail-close-btn {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .detail-nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .detail-nav-btn-prev {
+    left: 12px;
+  }
+
+  .detail-nav-btn-next {
+    right: 12px;
+  }
+
+  .upload-modal-card {
+    padding: 24px;
+    margin: 16px;
+  }
+
+  .upload-drop-zone {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container-60 {
+    width: 94%;
+  }
+
+  .nav-bar-inner {
+    padding: 0 12px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.5rem, 10vw, 2.2rem);
+    line-height: 1.1;
+  }
+
+  .hero-subtitle {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .hero-stats {
+    gap: 20px;
+  }
+
+  .category-pill {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+
+  .masonry-container {
+    columns: 1;
+    column-gap: 16px;
+  }
+
+  .masonry-item {
+    margin-bottom: 16px;
+  }
+
+  .photo-card-overlay {
+    padding: 32px 12px 12px;
+  }
+
+  .photo-card-title {
+    font-size: 13px;
+  }
+
+  .photo-card-meta {
+    font-size: 10px;
+  }
+
+  .login-card {
+    padding: 28px 16px;
+    max-width: 320px;
+  }
+
+  .detail-wrapper {
+    width: 98%;
+    max-height: 92vh;
+  }
+}

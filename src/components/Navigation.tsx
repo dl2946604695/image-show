@@ -59,7 +59,7 @@ export function Navigation() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <div className={`nav-search-wrapper ${searchFocused ? 'nav-search-wrapper-focused' : ''}`}>
               <Search className="nav-search-icon" />
               <input
