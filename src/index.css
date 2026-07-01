@@ -131,6 +131,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
+  gap: 16px;
 }
 
 @media (max-width: 1200px) {
@@ -143,6 +144,8 @@ h1, h2, h3, h4, h5, h6 {
   .nav-bar-inner {
     width: 100%;
     padding: 0 16px;
+    height: 52px;
+    gap: 12px;
   }
 }
 
@@ -154,29 +157,30 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-logo-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.05));
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 212, 255, 0.25);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .nav-logo-icon-inner {
-  width: 24px;
-  height: 24px;
-  background: var(--color-accent);
+  width: 26px;
+  height: 26px;
+  background: rgba(0, 212, 255, 0.15);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(0, 212, 255, 0.3);
 }
 
 .nav-logo-icon-inner svg {
-  color: var(--color-bg);
+  color: var(--color-accent);
 }
 
 .nav-logo-text {
@@ -322,18 +326,19 @@ h1, h2, h3, h4, h5, h6 {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .nav-menu-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(0, 212, 255, 0.2);
+  border-color: rgba(0, 212, 255, 0.3);
 }
 
 .nav-menu-btn svg {
@@ -1411,27 +1416,30 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 768px) {
-  .nav-bar-inner {
-    height: 52px;
-  }
-
   .nav-logo-text {
-    font-size: 15px;
+    font-size: 16px;
+    font-weight: 600;
   }
 
   .nav-logo-icon {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .nav-logo-icon-inner {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 212, 255, 0.12);
+    border-color: rgba(0, 212, 255, 0.25);
   }
 
   .nav-menu-btn {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .hero-section {
@@ -1556,6 +1564,27 @@ h1, h2, h3, h4, h5, h6 {
 
   .nav-bar-inner {
     padding: 0 12px;
+    height: 48px;
+    gap: 10px;
+  }
+
+  .nav-logo-text {
+    font-size: 15px;
+  }
+
+  .nav-logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-logo-icon-inner {
+    width: 22px;
+    height: 22px;
+  }
+
+  .nav-menu-btn {
+    width: 32px;
+    height: 32px;
   }
 
   .hero-title {
@@ -1578,7 +1607,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .masonry-container {
-    columns: 1;
+    columns: 2;
     column-gap: 16px;
   }
 
