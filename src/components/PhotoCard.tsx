@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { usePhotoStore } from '@/store/photoStore';
 import type { Photo } from '@/types';
 
 interface PhotoCardProps {
@@ -8,14 +8,14 @@ interface PhotoCardProps {
 const heights = [280, 320, 360, 400, 440];
 
 export function PhotoCard({ photo }: PhotoCardProps) {
-  const navigate = useNavigate();
+  const { openDetail } = usePhotoStore();
   const height = heights[parseInt(photo.id) % heights.length];
 
   return (
     <div
       className="masonry-item photo-card"
       style={{ height: `${height}px` }}
-      onClick={() => navigate(`/photo/${photo.id}`)}
+      onClick={() => openDetail(photo)}
     >
       <img
         src={photo.thumbnailUrl}

@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet, useLocation, useNavigation } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Gallery } from '@/pages/Gallery';
-import { PhotoDetail } from '@/pages/PhotoDetail';
 import { Upload } from '@/pages/Upload';
 import { Login } from '@/pages/Login';
 import { useAuthStore } from '@/store/authStore';
@@ -63,7 +62,6 @@ function App() {
       element: <AppContent />,
       children: [
         { path: '/', element: <Gallery /> },
-        { path: '/photo/:id', element: <PhotoDetail /> },
         { path: '/upload', element: <Upload /> },
         { path: '/login', element: <Login /> },
       ],

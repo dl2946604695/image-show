@@ -9,6 +9,8 @@ export const usePhotoStore = create<PhotoState>((set, get) => ({
   loading: false,
   hasLoaded: false,
   scrollY: 0,
+  selectedPhoto: null,
+  showDetail: false,
 
   setPhotos: (photos) => set({ photos }),
   setCategories: (categories) => set({ categories }),
@@ -17,6 +19,11 @@ export const usePhotoStore = create<PhotoState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setHasLoaded: (hasLoaded) => set({ hasLoaded }),
   setScrollY: (scrollY) => set({ scrollY }),
+  setSelectedPhoto: (photo) => set({ selectedPhoto: photo }),
+  setShowDetail: (show) => set({ showDetail: show }),
+
+  openDetail: (photo) => set({ selectedPhoto: photo, showDetail: true }),
+  closeDetail: () => set({ selectedPhoto: null, showDetail: false }),
 
   getFilteredPhotos: () => {
     const { photos, selectedCategory, searchQuery } = get();

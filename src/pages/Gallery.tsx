@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { CategoryFilter } from '@/components/CategoryFilter';
+import { PhotoDetailModal } from '@/components/PhotoDetailModal';
 import { usePhotoStore } from '@/store/photoStore';
 import { getPhotos, getCategories } from '@/lib/api';
 import { mockPhotos, mockCategories } from '@/lib/mockData';
@@ -12,6 +13,7 @@ export function Gallery() {
     categories,
     loading,
     hasLoaded,
+    showDetail,
     setPhotos, 
     setCategories, 
     setLoading,
@@ -111,6 +113,8 @@ export function Gallery() {
           <PhotoGrid photos={filteredPhotos} loading={loading} />
         </div>
       </section>
+      
+      {showDetail && <PhotoDetailModal />}
     </div>
   );
 }
