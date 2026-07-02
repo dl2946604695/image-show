@@ -30,11 +30,13 @@ export interface PhotoState {
   selectedCategory: string;
   searchQuery: string;
   loading: boolean;
+  hasLoaded: boolean;
   setPhotos: (photos: Photo[]) => void;
   setCategories: (categories: Category[]) => void;
   setSelectedCategory: (category: string) => void;
   setSearchQuery: (query: string) => void;
   setLoading: (loading: boolean) => void;
+  setHasLoaded: (hasLoaded: boolean) => void;
   getFilteredPhotos: () => Photo[];
 }
 

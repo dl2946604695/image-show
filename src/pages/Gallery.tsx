@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { usePhotoStore } from '@/store/photoStore';
@@ -11,12 +11,13 @@ export function Gallery() {
     photos, 
     categories,
     loading,
+    hasLoaded,
     setPhotos, 
     setCategories, 
     setLoading,
+    setHasLoaded,
     getFilteredPhotos 
   } = usePhotoStore();
-  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -67,7 +68,7 @@ export function Gallery() {
     };
 
     fetchPhotos();
-  }, [setPhotos, setCategories, setLoading, hasLoaded, photos.length]);
+  }, [setPhotos, setCategories, setLoading, setHasLoaded, hasLoaded, photos.length]);
 
   const filteredPhotos = getFilteredPhotos();
 
