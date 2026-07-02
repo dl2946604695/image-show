@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, ScrollRestoration } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Gallery } from '@/pages/Gallery';
 import { PhotoDetail } from '@/pages/PhotoDetail';
@@ -26,6 +26,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-bg">
         <Navigation />
+        <ScrollRestoration />
         <Routes>
           <Route path="/" element={<Gallery />} />
           <Route path="/photo/:id" element={<PhotoDetail />} />
