@@ -1,11 +1,21 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, ScrollRestoration } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, ScrollRestoration, Outlet } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Gallery } from '@/pages/Gallery';
 import { PhotoDetail } from '@/pages/PhotoDetail';
 import { Upload } from '@/pages/Upload';
 import { Login } from '@/pages/Login';
 import { useAuthStore } from '@/store/authStore';
+
+function AppContent() {
+  return (
+    <div className="min-h-screen bg-bg">
+      <Navigation />
+      <ScrollRestoration />
+      <Outlet />
+    </div>
+  );
+}
 
 function App() {
   const { initAuth, loading: authLoading } = useAuthStore();
@@ -22,20 +32,19 @@ function App() {
     );
   }
 
-  return (
-    <Router>
-      <div className="min-h-screen bg-bg">
-        <Navigation />
-        <ScrollRestoration />
-        <Routes>
-          <Route path="/" element={<Gallery />} />
-          <Route path="/photo/:id" element={<PhotoDetail />} />
-          <Route path="/upload" element={<Upload />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </div>
-    </Router>
-  );
+  const router = createBrowserRouter([
+    {
+      element: <AppContent />,
+      children: [
+        { path: '/', element: <Gallery /> },
+        { path: '/photo/:id', element: <PhotoDetail /> },
+        { path: '/upload', element: <Upload /> },
+        { path: '/login', element: <Login /> },
+      ],
+    },
+  ]);
+
+  return <RouterProvider router={router} />;
 }
 
 export default App;
