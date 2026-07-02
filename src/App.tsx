@@ -10,24 +10,25 @@ import { usePhotoStore } from '@/store/photoStore';
 
 function ScrollRestoreHandler() {
   const location = useLocation();
+  const navigation = useNavigation();
   const { scrollY, setScrollY } = usePhotoStore();
-
-  useLayoutEffect(() => {
-    if (location.pathname === '/' && scrollY > 0) {
-      window.scrollTo(0, scrollY);
-    }
-  }, [location.pathname, scrollY]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (location.pathname === '/') {
+      if (location.pathname === '/' && navigation.state === 'idle') {
         setScrollY(window.scrollY);
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [location.pathname, setScrollY]);
+  }, [location.pathname, setScrollY, navigation.state]);
+
+  useEffect(() => {
+    if (location.pathname === '/' && scrollY > 0 && navigation.state === 'idle') {
+      window.scrollTo({ top: scrollY, behavior: 'instant' });
+    }
+  }, [location.pathname, scrollY, navigation.state]);
 
   return null;
 }
