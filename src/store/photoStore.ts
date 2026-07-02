@@ -9,6 +9,7 @@ export const usePhotoStore = create<PhotoState>((set, get) => ({
   loading: false,
   hasLoaded: false,
   scrollPosition: 0,
+  shouldRestoreScroll: false,
 
   setPhotos: (photos) => set({ photos }),
   setCategories: (categories) => set({ categories }),
@@ -17,6 +18,7 @@ export const usePhotoStore = create<PhotoState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setHasLoaded: (hasLoaded) => set({ hasLoaded }),
   setScrollPosition: (scrollPosition) => set({ scrollPosition }),
+  setShouldRestoreScroll: (shouldRestoreScroll) => set({ shouldRestoreScroll }),
 
   getFilteredPhotos: () => {
     const { photos, selectedCategory, searchQuery } = get();

@@ -8,7 +8,7 @@ import type { Photo } from '@/types';
 export function PhotoDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { photos, setPhotos } = usePhotoStore();
+  const { photos, setPhotos, setShouldRestoreScroll } = usePhotoStore();
   const [photo, setPhoto] = useState<Photo | null>(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
@@ -20,6 +20,7 @@ export function PhotoDetail() {
   const nextPhoto = photoIndex < photos.length - 1 ? photos[photoIndex + 1] : null;
 
   const handleClose = () => {
+    setShouldRestoreScroll(true);
     navigate('/', { replace: true });
   };
 

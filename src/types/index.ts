@@ -32,6 +32,7 @@ export interface PhotoState {
   loading: boolean;
   hasLoaded: boolean;
   scrollPosition: number;
+  shouldRestoreScroll: boolean;
   setPhotos: (photos: Photo[]) => void;
   setCategories: (categories: Category[]) => void;
   setSelectedCategory: (category: string) => void;
@@ -39,6 +40,7 @@ export interface PhotoState {
   setLoading: (loading: boolean) => void;
   setHasLoaded: (hasLoaded: boolean) => void;
   setScrollPosition: (scrollPosition: number) => void;
+  setShouldRestoreScroll: (shouldRestoreScroll: boolean) => void;
   getFilteredPhotos: () => Photo[];
 }
 

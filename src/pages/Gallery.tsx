@@ -13,11 +13,13 @@ export function Gallery() {
     loading,
     hasLoaded,
     scrollPosition,
+    shouldRestoreScroll,
     setPhotos, 
     setCategories, 
     setLoading,
     setHasLoaded,
     setScrollPosition,
+    setShouldRestoreScroll,
     getFilteredPhotos 
   } = usePhotoStore();
 
@@ -73,10 +75,14 @@ export function Gallery() {
   }, [setPhotos, setCategories, setLoading, setHasLoaded, hasLoaded, photos.length]);
 
   useEffect(() => {
-    if (hasLoaded && scrollPosition > 0) {
-      window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+    if (shouldRestoreScroll && scrollPosition > 0) {
+      const timer = setTimeout(() => {
+        window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+        setShouldRestoreScroll(false);
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [hasLoaded, scrollPosition]);
+  }, [shouldRestoreScroll, scrollPosition, setShouldRestoreScroll]);
 
   useEffect(() => {
     const handleScroll = () => {
