@@ -12,10 +12,12 @@ export function Gallery() {
     categories,
     loading,
     hasLoaded,
+    scrollPosition,
     setPhotos, 
     setCategories, 
     setLoading,
     setHasLoaded,
+    setScrollPosition,
     getFilteredPhotos 
   } = usePhotoStore();
 
@@ -69,6 +71,21 @@ export function Gallery() {
 
     fetchPhotos();
   }, [setPhotos, setCategories, setLoading, setHasLoaded, hasLoaded, photos.length]);
+
+  useEffect(() => {
+    if (hasLoaded && scrollPosition > 0) {
+      window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+    }
+  }, [hasLoaded, scrollPosition]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [setScrollPosition]);
 
   const filteredPhotos = getFilteredPhotos();
 
