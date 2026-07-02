@@ -31,12 +31,14 @@ export interface PhotoState {
   searchQuery: string;
   loading: boolean;
   hasLoaded: boolean;
+  scrollY: number;
   setPhotos: (photos: Photo[]) => void;
   setCategories: (categories: Category[]) => void;
   setSelectedCategory: (category: string) => void;
   setSearchQuery: (query: string) => void;
   setLoading: (loading: boolean) => void;
   setHasLoaded: (hasLoaded: boolean) => void;
+  setScrollY: (scrollY: number) => void;
   getFilteredPhotos: () => Photo[];
 }
 

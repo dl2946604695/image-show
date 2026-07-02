@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, ScrollRestoration, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Gallery } from '@/pages/Gallery';
 import { PhotoDetail } from '@/pages/PhotoDetail';
@@ -11,7 +11,6 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-bg">
       <Navigation />
-      <ScrollRestoration />
       <Outlet />
     </div>
   );

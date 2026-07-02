@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { usePhotoStore } from '@/store/photoStore';
@@ -12,10 +12,12 @@ export function Gallery() {
     categories,
     loading,
     hasLoaded,
+    scrollY,
     setPhotos, 
     setCategories, 
     setLoading,
     setHasLoaded,
+    setScrollY,
     getFilteredPhotos 
   } = usePhotoStore();
 
@@ -70,8 +72,22 @@ export function Gallery() {
     fetchPhotos();
   }, [setPhotos, setCategories, setLoading, setHasLoaded, hasLoaded, photos.length]);
 
-  
+  useLayoutEffect(() => {
+    if (scrollY > 0) {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+      });
+    }
+  }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [setScrollY]);
   const filteredPhotos = getFilteredPhotos();
 
   return (

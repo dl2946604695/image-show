@@ -20,7 +20,7 @@ export function PhotoDetail() {
   const nextPhoto = photoIndex < photos.length - 1 ? photos[photoIndex + 1] : null;
 
   const handleClose = () => {
-    navigate(-1);
+    navigate('/', { replace: true });
   };
 
   const fetchPhoto = useCallback(async () => {
