@@ -8,7 +8,7 @@ import type { Photo } from '@/types';
 export function PhotoDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { photos, setPhotos } = usePhotoStore();
+  const { photos, setPhotos, setScrollY } = usePhotoStore();
   const [photo, setPhoto] = useState<Photo | null>(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
@@ -19,8 +19,13 @@ export function PhotoDetail() {
   const prevPhoto = photoIndex > 0 ? photos[photoIndex - 1] : null;
   const nextPhoto = photoIndex < photos.length - 1 ? photos[photoIndex + 1] : null;
 
+  useEffect(() => {
+    setScrollY(window.scrollY);
+  }, [setScrollY]);
+
   const handleClose = () => {
-    navigate('/', { replace: true });
+    const { scrollY } = usePhotoStore.getState();
+    navigate('/', { replace: true, state: { scrollY } });
   };
 
   const fetchPhoto = useCallback(async () => {

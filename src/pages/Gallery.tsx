@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { PhotoGrid } from '@/components/PhotoGrid';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { usePhotoStore } from '@/store/photoStore';
@@ -7,17 +8,35 @@ import { mockPhotos, mockCategories } from '@/lib/mockData';
 import type { Photo, Category } from '@/types';
 
 export function Gallery() {
+  const location = useLocation();
   const { 
     photos, 
     categories,
     loading,
     hasLoaded,
+    scrollY,
     setPhotos, 
     setCategories, 
     setLoading,
     setHasLoaded,
+    setScrollY,
     getFilteredPhotos 
   } = usePhotoStore();
+
+  useLayoutEffect(() => {
+    const scrollPos = (location.state as any)?.scrollY ?? scrollY;
+    if (scrollPos > 0) {
+      window.scrollTo(0, scrollPos);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [setScrollY]);
 
   useEffect(() => {
     const fetchPhotos = async () => {
