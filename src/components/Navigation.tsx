@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Menu, X, Camera, User, Plus, Image, Star, Users, LogOut, ChevronLeft } from 'lucide-react';
+import { Search, Menu, X, Camera, User, Plus, Image, Star, Users, LogOut, ChevronLeft, Bot } from 'lucide-react';
 import { usePhotoStore } from '@/store/photoStore';
 import { useAuthStore } from '@/store/authStore';
 
@@ -74,6 +74,13 @@ export function Navigation() {
             </div>
             
             <div className="nav-actions">
+              <button
+                onClick={() => navigate('/agent')}
+                className="nav-action-btn nav-action-btn-secondary"
+              >
+                <Bot className="w-4 h-4" />
+                <span>摄影老师</span>
+              </button>
               {isAuthenticated ? (
                 <>
                   <button

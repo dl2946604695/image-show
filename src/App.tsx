@@ -4,6 +4,7 @@ import { Navigation } from '@/components/Navigation';
 import { Gallery } from '@/pages/Gallery';
 import { Upload } from '@/pages/Upload';
 import { Login } from '@/pages/Login';
+import { AgentChat } from '@/pages/AgentChat';
 import { useAuthStore } from '@/store/authStore';
 import { usePhotoStore } from '@/store/photoStore';
 
@@ -64,6 +65,7 @@ function App() {
         { path: '/', element: <Gallery /> },
         { path: '/upload', element: <Upload /> },
         { path: '/login', element: <Login /> },
+        { path: '/agent', element: <AgentChat /> },
       ],
     },
   ]);
