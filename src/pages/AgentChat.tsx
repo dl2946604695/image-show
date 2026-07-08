@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Sparkles, Trash2, Plus, ChevronLeft, MoreVertical, MessageSquare, Copy, Check, RefreshCw } from 'lucide-react';
+import { Send, Bot, User, Loader2, Plus, ChevronLeft, MoreVertical, Copy, Check, RefreshCw, MessageSquare } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -17,6 +17,15 @@ interface Conversation {
 }
 
 const defaultWelcomeMessage = '你好！我是摄影老师，有什么关于摄影的问题可以问我。';
+
+const suggestions = [
+  '如何拍出好的人像？',
+  '风景摄影技巧',
+  '新手买什么相机？',
+  '后期修图入门',
+  '拍照构图方法',
+  '如何选择镜头？',
+];
 
 export function AgentChat() {
   const [conversations, setConversations] = useState<Conversation[]>([
@@ -132,12 +141,13 @@ export function AgentChat() {
     setIsLoading(false);
   };
 
-  const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+  const sendMessage = async (text?: string) => {
+    const messageContent = text || inputValue.trim();
+    if (!messageContent || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: inputValue.trim(),
+      content: messageContent,
       sender: 'user',
       timestamp: new Date(),
     };
@@ -155,7 +165,7 @@ export function AgentChat() {
 
     setConversations(prev => prev.map(c => 
       c.id === currentConversationId 
-        ? { ...c, lastMessage: inputValue.trim(), timestamp: new Date() }
+        ? { ...c, lastMessage: messageContent, timestamp: new Date() }
         : c
     ));
 
@@ -207,31 +217,25 @@ export function AgentChat() {
     }
   };
 
+  const hasMessages = messages.length > 1 || messages[0].content !== defaultWelcomeMessage;
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex">
-      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-80 bg-[#0f0f0f] border-r border-[#1a1a1a] transform transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-[#0f0f0f] border-r border-[#1a1a1a] transform transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="h-full flex flex-col">
-          <div className="p-4 border-b border-[#1a1a1a]">
+          <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-white">对话</h2>
               <button 
                 onClick={createNewConversation}
-                className="w-8 h-8 rounded-lg bg-[#1a1a1a] flex items-center justify-center hover:bg-[#242424] transition-colors"
+                className="w-7 h-7 rounded-lg bg-[#1a1a1a] flex items-center justify-center hover:bg-[#242424] transition-colors"
               >
-                <Plus className="w-4 h-4 text-[#00d4ff]" />
+                <Plus className="w-4 h-4 text-white/70" />
               </button>
-            </div>
-            
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="搜索对话..."
-                className="w-full bg-[#141414] border border-[#1a1a1a] rounded-lg px-3 py-2 text-sm text-white placeholder-[#555] focus:outline-none focus:border-[#00d4ff]/40 transition-colors"
-              />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2">
+          <div className="flex-1 overflow-y-auto">
             {conversations.map((conversation) => (
               <div
                 key={conversation.id}
@@ -239,16 +243,16 @@ export function AgentChat() {
                   setCurrentConversationId(conversation.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`group flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                className={`group flex items-start gap-3 p-3 cursor-pointer transition-all ${
                   currentConversationId === conversation.id
-                    ? 'bg-[#1a1a1a] border border-[#00d4ff]/20'
-                    : 'hover:bg-[#141414] border border-transparent'
+                    ? 'bg-[#1a1a1a]'
+                    : 'hover:bg-[#141414]'
                 }`}
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                  currentConversationId === conversation.id ? 'bg-[#00d4ff]/15' : 'bg-[#1a1a1a]'
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  currentConversationId === conversation.id ? 'bg-[#7c5cfc]/15' : 'bg-[#1a1a1a]'
                 }`}>
-                  <Bot className="w-5 h-5 text-[#00d4ff]" />
+                  <Bot className="w-4 h-4 text-[#7c5cfc]" />
                 </div>
                 
                 <div className="flex-1 min-w-0">
@@ -261,9 +265,9 @@ export function AgentChat() {
 
                 <button
                   onClick={(e) => deleteConversation(conversation.id, e)}
-                  className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg flex items-center justify-center text-[#666] hover:text-red-500 hover:bg-red-500/10 transition-all"
+                  className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center text-[#555] hover:text-red-500 transition-all"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <MoreVertical className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -271,8 +275,8 @@ export function AgentChat() {
 
           <div className="p-4 border-t border-[#1a1a1a]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00d4ff]/20 to-purple-500/20 flex items-center justify-center border border-[#00d4ff]/15">
-                <Sparkles className="w-5 h-5 text-[#00d4ff]" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7c5cfc]/20 to-pink-500/20 flex items-center justify-center">
+                <Bot className="w-5 h-5 text-[#7c5cfc]" />
               </div>
               <div>
                 <div className="text-sm font-medium text-white">摄影老师</div>
@@ -291,7 +295,7 @@ export function AgentChat() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-center justify-between px-4 py-3 bg-[#0f0f0f] border-b border-[#1a1a1a] lg:px-6">
+        <div className="flex items-center justify-between px-4 py-3 bg-[#0f0f0f] border-b border-[#1a1a1a]">
           <button 
             onClick={() => setMobileMenuOpen(true)}
             className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[#141414] transition-colors"
@@ -300,8 +304,8 @@ export function AgentChat() {
           </button>
           
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#00d4ff]/15 flex items-center justify-center border border-[#00d4ff]/15">
-              <Bot className="w-5 h-5 text-[#00d4ff]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7c5cfc]/20 to-pink-500/20 flex items-center justify-center">
+              <Bot className="w-4 h-4 text-[#7c5cfc]" />
             </div>
             <div>
               <div className="text-sm font-medium text-white">摄影老师</div>
@@ -317,80 +321,106 @@ export function AgentChat() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <div className="max-w-3xl mx-auto space-y-6">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex items-end gap-3 max-w-[85%] ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    message.sender === 'user' 
-                      ? 'bg-[#00d4ff]/15' 
-                      : 'bg-[#1a1a1a]'
-                  }`}>
-                    {message.sender === 'user' ? (
-                      <User className="w-4 h-4 text-[#00d4ff]" />
-                    ) : (
-                      <Bot className="w-4 h-4 text-[#00d4ff]" />
-                    )}
-                  </div>
-                  
-                  <div className={`rounded-2xl transition-all duration-300 ${
-                    message.sender === 'user'
-                      ? 'bg-gradient-to-br from-[#00d4ff] to-[#00a8cc] text-white rounded-br-sm'
-                      : 'bg-[#141414] text-white rounded-bl-sm border border-[#1a1a1a]'
-                  }`}>
-                    <div className="px-4 py-3">
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                      {message.content === '' && isLoading && (
-                        <div className="flex gap-1.5 mt-2">
-                          <span className="w-1.5 h-1.5 bg-[#00d4ff]/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-1.5 h-1.5 bg-[#00d4ff]/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-1.5 h-1.5 bg-[#00d4ff]/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-2xl mx-auto">
+            {!hasMessages && messages.length === 1 && (
+              <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#7c5cfc]/20 to-pink-500/20 flex items-center justify-center mb-6">
+                  <Bot className="w-10 h-10 text-[#7c5cfc]" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">摄影老师</h3>
+                <p className="text-[#666] text-sm mb-8">有什么关于摄影的问题都可以问我</p>
+                
+                <div className="flex flex-wrap justify-center gap-2">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => sendMessage(suggestion)}
+                      className="px-4 py-2 bg-[#1a1a1a] hover:bg-[#242424] text-[#999] text-sm rounded-full border border-[#242424] hover:border-[#7c5cfc]/30 hover:text-white transition-all"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-6">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex items-start gap-3 max-w-[85%] ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      message.sender === 'user' 
+                        ? 'bg-[#7c5cfc]/15' 
+                        : 'bg-[#1a1a1a]'
+                    }`}>
+                      {message.sender === 'user' ? (
+                        <User className="w-4 h-4 text-[#7c5cfc]" />
+                      ) : (
+                        <Bot className="w-4 h-4 text-[#7c5cfc]" />
                       )}
                     </div>
-                    <div className={`px-4 pb-2 flex items-center justify-end gap-3 text-xs ${message.sender === 'user' ? 'text-white/50' : 'text-[#555]'}`}>
-                      {message.timestamp.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                      {message.sender === 'agent' && (
-                        <>
-                          <button 
-                            onClick={() => copyMessage(message.id, message.content)}
-                            className="flex items-center gap-1 hover:text-[#00d4ff] transition-colors"
-                          >
-                            {copiedId === message.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                          </button>
-                          <button 
-                            onClick={() => retryMessage(message)}
-                            className="flex items-center gap-1 hover:text-[#00d4ff] transition-colors"
-                          >
-                            <RefreshCw className="w-3 h-3" />
-                          </button>
-                        </>
+                    
+                    <div className={`max-w-[calc(100%-36px)] ${message.sender === 'user' ? '' : ''}`}>
+                      {message.sender === 'user' ? (
+                        <div className="bg-[#7c5cfc] text-white text-sm leading-relaxed rounded-2xl rounded-tr-sm px-4 py-3">
+                          {message.content}
+                        </div>
+                      ) : (
+                        <div className="text-sm leading-relaxed text-white/90">
+                          {message.content}
+                          {message.content === '' && isLoading && (
+                            <div className="flex gap-1.5 mt-3">
+                              <span className="w-2 h-2 bg-[#7c5cfc]/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                              <span className="w-2 h-2 bg-[#7c5cfc]/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                              <span className="w-2 h-2 bg-[#7c5cfc]/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                            </div>
+                          )}
+                        </div>
                       )}
+                      <div className={`flex items-center justify-end gap-3 mt-1 text-xs ${message.sender === 'user' ? 'text-white/40' : 'text-[#555]'}`}>
+                        {message.timestamp.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                        {message.sender === 'agent' && (
+                          <>
+                            <button 
+                              onClick={() => copyMessage(message.id, message.content)}
+                              className="flex items-center gap-1 hover:text-[#7c5cfc] transition-colors"
+                            >
+                              {copiedId === message.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                            </button>
+                            <button 
+                              onClick={() => retryMessage(message)}
+                              className="flex items-center gap-1 hover:text-[#7c5cfc] transition-colors"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
         </div>
 
-        <div className="px-4 py-4 bg-[#0f0f0f] border-t border-[#1a1a1a] lg:px-6">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-end gap-3 bg-[#141414] rounded-2xl p-3 border border-[#1a1a1a] focus-within:border-[#00d4ff]/30 focus-within:shadow-[0_0_16px_rgba(0,212,255,0.08)] transition-all">
-              <button className="w-9 h-9 rounded-lg flex items-center justify-center text-[#666] hover:text-[#00d4ff] hover:bg-[#00d4ff]/10 transition-colors flex-shrink-0">
-                <Sparkles className="w-4 h-4" />
+        <div className="px-6 py-4 bg-[#0f0f0f] border-t border-[#1a1a1a]">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-end gap-3 bg-[#1a1a1a] rounded-2xl p-3 border border-[#242424] focus-within:border-[#7c5cfc]/30 transition-colors">
+              <button className="w-9 h-9 rounded-lg flex items-center justify-center text-[#666] hover:text-white hover:bg-[#242424] transition-colors flex-shrink-0">
+                <Plus className="w-4 h-4" />
               </button>
               
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="输入你的问题..."
+                placeholder="发消息..."
                 className="flex-1 bg-transparent text-white placeholder-[#555] resize-none outline-none text-sm py-2 max-h-32"
                 rows={1}
                 style={{ minHeight: '40px' }}
@@ -401,8 +431,8 @@ export function AgentChat() {
                 disabled={!inputValue.trim() || isLoading}
                 className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
                   inputValue.trim() && !isLoading
-                    ? 'bg-[#00d4ff] hover:bg-[#00d4ff]/90 text-black shadow-[0_0_12px_rgba(0,212,255,0.3)]'
-                    : 'bg-[#1a1a1a] text-[#555] cursor-not-allowed'
+                    ? 'bg-[#7c5cfc] hover:bg-[#7c5cfc]/90 text-white'
+                    : 'bg-[#242424] text-[#555] cursor-not-allowed'
                 }`}
               >
                 {isLoading ? (
@@ -413,9 +443,15 @@ export function AgentChat() {
               </button>
             </div>
             
-            <p className="text-xs text-[#555] text-center mt-3">
-              AI 生成的内容仅供参考，请谨慎使用
-            </p>
+            <div className="flex items-center justify-center gap-4 mt-3">
+              <span className="text-xs text-[#555]">快速</span>
+              <span className="text-xs text-[#555]">帮我写作</span>
+              <span className="text-xs text-[#555]">图像生成</span>
+              <span className="text-xs text-[#555]">PPT生成</span>
+              <span className="text-xs text-[#555]">编程</span>
+              <span className="text-xs text-[#555]">翻译</span>
+              <span className="text-xs text-[#555]">更多</span>
+            </div>
           </div>
         </div>
       </div>
