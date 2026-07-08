@@ -427,7 +427,7 @@ export function AgentChat() {
               />
               
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={!inputValue.trim() || isLoading}
                 className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
                   inputValue.trim() && !isLoading
