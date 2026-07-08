@@ -1,6 +1,3 @@
 name = "image-show"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
-
-[vars]
-WEGENT_API_KEY = "wg-Go2C311xbQqQn6cxvzMUqafGSMc0wVWm4mrqVDtpI48"
