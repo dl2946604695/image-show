@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Send, Bot, User, Loader2 } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -10,7 +9,6 @@ interface Message {
 }
 
 export function AgentChat() {
-  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -119,24 +117,7 @@ export function AgentChat() {
   };
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
-      <div className="nav-bar">
-        <div className="nav-bar-inner container-60">
-          <button
-            onClick={() => navigate('/')}
-            className="nav-menu-btn flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-accent" />
-            </div>
-            <span className="text-white font-medium">摄影老师</span>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-bg flex flex-col pt-[56px]">
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-2xl mx-auto space-y-6">
           {messages.map((message) => (

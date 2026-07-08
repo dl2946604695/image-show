@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Menu, X, Camera, User, Plus, Image, Star, Users, LogOut, ChevronLeft, Bot } from 'lucide-react';
 import { usePhotoStore } from '@/store/photoStore';
 import { useAuthStore } from '@/store/authStore';
 
 export function Navigation() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setSearchQuery, searchQuery } = usePhotoStore();
   const { user, isAuthenticated, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -28,9 +29,10 @@ export function Navigation() {
   };
 
   const navItems = [
-    { icon: Image, label: '探索', active: true, path: '/' },
-    { icon: Star, label: '精选', active: false, path: '/' },
-    { icon: Users, label: '摄影师', active: false, path: '/' },
+    { icon: Image, label: '探索', path: '/' },
+    { icon: Star, label: '精选', path: '/' },
+    { icon: Users, label: '摄影师', path: '/' },
+    { icon: Bot, label: '摄影老师', path: '/agent' },
   ];
 
   return (
@@ -51,7 +53,7 @@ export function Navigation() {
               <button 
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className={`nav-link ${item.active ? 'nav-link-active' : ''}`}
+                className={`nav-link ${location.pathname === item.path ? 'nav-link-active' : ''}`}
               >
                 <item.icon className="w-4 h-4" />
                 <span>{item.label}</span>
@@ -74,13 +76,6 @@ export function Navigation() {
             </div>
             
             <div className="nav-actions">
-              <button
-                onClick={() => navigate('/agent')}
-                className="nav-action-btn nav-action-btn-secondary"
-              >
-                <Bot className="w-4 h-4" />
-                <span>摄影老师</span>
-              </button>
               {isAuthenticated ? (
                 <>
                   <button
@@ -160,7 +155,7 @@ export function Navigation() {
                   <button 
                     key={item.label}
                     onClick={() => { navigate(item.path); setMobileMenuOpen(false); }}
-                    className={`nav-drawer-link ${item.active ? 'nav-drawer-link-active' : ''}`}
+                    className={`nav-drawer-link ${location.pathname === item.path ? 'nav-drawer-link-active' : ''}`}
                   >
                     <item.icon className="w-5 h-5" />
                     <span>{item.label}</span>
