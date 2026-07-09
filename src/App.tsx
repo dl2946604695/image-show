@@ -34,9 +34,12 @@ function ScrollRestoreHandler() {
 }
 
 function AppContent() {
+  const location = useLocation();
+  const isAgentPage = location.pathname === '/agent';
+  
   return (
     <div className="min-h-screen bg-bg">
-      <Navigation />
+      {!isAgentPage && <Navigation />}
       <ScrollRestoreHandler />
       <Outlet />
     </div>

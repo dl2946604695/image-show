@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, Camera, User, Loader2, Plus, ChevronLeft, Menu, MoreVertical, Copy, Check, RefreshCw } from 'lucide-react';
+import { Camera, User, Loader2, Plus, ChevronLeft, Menu, MoreVertical, Copy, Check, RefreshCw } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -179,63 +179,60 @@ export function AgentChat() {
     }
   };
 
-  const hasMessages = messages.length > 1 || messages[0].content !== defaultWelcomeMessage;
+  const hasMessages = messages.length > 1;
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
-      <header className="fixed top-0 left-0 right-0 z-50 h-12 bg-[#0f0f0f]/80 backdrop-blur-md border-b border-[#242424] flex items-center justify-between px-4">
+    <div className="min-h-screen bg-[#161616] flex flex-col">
+      <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-[#121212]/80 backdrop-blur-xl border-b border-[#2a2a2a] flex items-center justify-between px-6">
         <button 
           onClick={() => navigate('/')}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-[#999] hover:text-white hover:bg-[#242424] transition-all"
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-[#999] hover:text-white hover:bg-[#2a2a2a] transition-all duration-200"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-1">
           {tabs.map((tab) => (
             <button
               key={tab.label}
               onClick={() => navigate(tab.path)}
-              className={`relative px-1 py-2 text-sm transition-all ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 tab.path === '/agent'
-                  ? 'text-[#00d4ff]'
-                  : 'text-[#999] hover:text-white'
+                  ? 'bg-[#00d4ff]/15 text-[#00d4ff]'
+                  : 'text-[#999] hover:text-white hover:bg-[#2a2a2a]/50'
               }`}
             >
               {tab.label}
-              {tab.path === '/agent' && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-[#00d4ff] rounded-full" />
-              )}
             </button>
           ))}
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#999] hover:text-white hover:bg-[#242424] transition-all">
+          <button className="w-10 h-10 rounded-xl flex items-center justify-center text-[#999] hover:text-white hover:bg-[#2a2a2a] transition-all duration-200">
             <Menu className="w-5 h-5" />
           </button>
-          <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#999] hover:text-white hover:bg-[#242424] transition-all">
+          <button className="w-10 h-10 rounded-xl flex items-center justify-center text-[#999] hover:text-white hover:bg-[#2a2a2a] transition-all duration-200">
             <MoreVertical className="w-5 h-5" />
           </button>
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto pt-12 pb-36">
-        <div className="max-w-2xl mx-auto px-6">
+      <main className="flex-1 overflow-y-auto pt-20 pb-48">
+        <div className="max-w-2xl mx-auto px-8">
           {!hasMessages && (
-            <div className="flex flex-col items-center pt-24 pb-12 text-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#00d4ff]/20 to-[#00d4ff]/5 flex items-center justify-center mb-6">
+            <div className="flex flex-col items-center pt-16 pb-12">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#00d4ff]/20 to-[#00d4ff]/5 flex items-center justify-center mb-6 shadow-lg shadow-black/20">
                 <Camera className="w-10 h-10 text-[#00d4ff]" />
               </div>
-              <h3 className="text-xl font-medium text-white mb-2">摄影老师</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">摄影老师</h3>
               <p className="text-[#666] text-sm">有任何摄影相关问题都可以向我提问</p>
 
-              <div className="flex flex-wrap justify-center gap-3 mt-8">
+              <div className="flex flex-wrap justify-center gap-3 mt-10">
                 {suggestions.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => sendMessage(suggestion)}
-                    className="px-4 py-2 bg-[#242424] hover:bg-[#2d2d2d] text-[#999] hover:text-white text-sm rounded-full border border-[#2d2d2d] hover:border-[#00d4ff]/30 transition-all"
+                    className="px-4 py-2.5 bg-[#242424] hover:bg-[#2d2d2d] text-[#999] hover:text-white text-sm rounded-full border border-[#2d2d2d] hover:border-[#00d4ff]/30 transition-all duration-200"
                   >
                     {suggestion}
                   </button>
@@ -244,25 +241,25 @@ export function AgentChat() {
             </div>
           )}
 
-          <div className="space-y-5 pt-8">
+          <div className="space-y-6 pt-8">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {message.sender === 'agent' && (
-                  <div className="w-8 h-8 rounded-full bg-[#242424] flex items-center justify-center flex-shrink-0 mr-3">
-                    <Camera className="w-4 h-4 text-[#00d4ff]" />
+                  <div className="w-9 h-9 rounded-full bg-[#242424] flex items-center justify-center flex-shrink-0 mr-3 shadow-md">
+                    <Camera className="w-4.5 h-4.5 text-[#00d4ff]" />
                   </div>
                 )}
 
                 <div className={`max-w-[75%] ${message.sender === 'user' ? 'text-right' : ''}`}>
                   {message.sender === 'user' ? (
-                    <div className="bg-[#00d4ff] text-white text-sm leading-relaxed rounded-2xl rounded-tr-sm px-4 py-3">
+                    <div className="bg-[#00d4ff] text-white text-sm leading-relaxed rounded-2xl rounded-tr-sm px-5 py-3.5 shadow-lg shadow-[#00d4ff]/10">
                       {message.content}
                     </div>
                   ) : (
-                    <div className="bg-white text-black text-sm leading-relaxed rounded-2xl rounded-tl-sm px-4 py-3 shadow-lg shadow-black/20">
+                    <div className="bg-white text-black text-sm leading-relaxed rounded-2xl rounded-tl-sm px-5 py-3.5 shadow-lg shadow-black/20">
                       {message.content}
                       {message.content === '' && isLoading && (
                         <div className="flex gap-1.5 mt-3">
@@ -274,21 +271,21 @@ export function AgentChat() {
                     </div>
                   )}
 
-                  <div className={`flex items-center justify-end gap-3 mt-1 text-xs ${message.sender === 'user' ? 'text-white/40' : 'text-[#555]'}`}>
+                  <div className={`flex items-center justify-end gap-3 mt-2 text-xs ${message.sender === 'user' ? 'text-white/40' : 'text-[#555]'}`}>
                     {message.timestamp.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
                     {message.sender === 'agent' && message.content && (
                       <>
                         <button 
                           onClick={() => copyMessage(message.id, message.content)}
-                          className="opacity-0 hover:opacity-100 flex items-center gap-1 text-[#555] hover:text-[#00d4ff] transition-all"
+                          className="opacity-0 hover:opacity-100 flex items-center gap-1 text-[#555] hover:text-[#00d4ff] transition-all duration-200"
                         >
-                          {copiedId === message.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copiedId === message.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                         </button>
                         <button 
                           onClick={() => retryMessage(message)}
-                          className="opacity-0 hover:opacity-100 flex items-center gap-1 text-[#555] hover:text-[#00d4ff] transition-all"
+                          className="opacity-0 hover:opacity-100 flex items-center gap-1 text-[#555] hover:text-[#00d4ff] transition-all duration-200"
                         >
-                          <RefreshCw className="w-3 h-3" />
+                          <RefreshCw className="w-3.5 h-3.5" />
                         </button>
                       </>
                     )}
@@ -299,12 +296,12 @@ export function AgentChat() {
             <div ref={messagesEndRef} />
           </div>
         </div>
-      </div>
+      </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-[#0f0f0f]/90 backdrop-blur-md border-t border-[#242424]">
-        <div className="max-w-2xl mx-auto px-6 py-3">
-          <div className="flex items-end gap-3 bg-[#242424] rounded-2xl p-3 border border-[#2d2d2d] focus-within:border-[#00d4ff]/30 transition-colors">
-            <button className="w-9 h-9 rounded-lg flex items-center justify-center text-[#999] hover:text-white hover:bg-[#2d2d2d] transition-all flex-shrink-0">
+      <footer className="fixed bottom-0 left-0 right-0 bg-[#121212]/90 backdrop-blur-xl border-t border-[#2a2a2a]">
+        <div className="max-w-2xl mx-auto px-8 py-4">
+          <div className="flex items-end gap-3 bg-[#242424] rounded-2xl p-3 border border-[#2d2d2d] focus-within:border-[#00d4ff]/30 transition-all duration-200">
+            <button className="w-10 h-10 rounded-xl flex items-center justify-center text-[#999] hover:text-white hover:bg-[#2d2d2d] transition-all duration-200 flex-shrink-0">
               <Plus className="w-5 h-5" />
             </button>
 
@@ -313,17 +310,17 @@ export function AgentChat() {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="输入你的摄影相关问题..."
-              className="flex-1 bg-transparent text-white placeholder-[#555] resize-none outline-none text-sm py-2 max-h-32"
+              className="flex-1 bg-transparent text-white placeholder-[#555] resize-none outline-none text-sm py-2.5 max-h-36"
               rows={1}
-              style={{ minHeight: '40px' }}
+              style={{ minHeight: '44px' }}
             />
 
             <button
               onClick={() => sendMessage()}
               disabled={!inputValue.trim() || isLoading}
-              className={`px-4 h-9 rounded-lg flex items-center gap-2 transition-all flex-shrink-0 ${
+              className={`px-5 h-10 rounded-xl flex items-center gap-2 transition-all duration-200 flex-shrink-0 ${
                 inputValue.trim() && !isLoading
-                  ? 'bg-[#00d4ff] hover:bg-[#00d4ff]/90 text-black'
+                  ? 'bg-[#00d4ff] hover:bg-[#00d4ff]/90 text-black hover:scale-105'
                   : 'bg-[#2d2d2d] text-[#555] cursor-not-allowed'
               }`}
             >
@@ -338,11 +335,11 @@ export function AgentChat() {
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-4 mt-3 pb-1">
+          <div className="flex items-center justify-center gap-5 mt-4 pb-1">
             {quickActions.map((action, index) => (
               <button
                 key={index}
-                className="text-xs text-[#555] hover:text-[#999] transition-colors"
+                className="text-xs text-[#555] hover:text-[#999] transition-colors duration-200"
               >
                 {action}
               </button>
