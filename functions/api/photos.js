@@ -1,5 +1,5 @@
-import { json, corsPreflight, getKV, getSecret } from '../../_lib/cors.js';
-import { getPhotos, ensureSeed } from '../../_lib/store.js';
+import { json, corsPreflight, getKV, getSecret } from '../_lib/cors.js';
+import { getPhotos, ensureSeed } from '../_lib/store.js';
 
 export async function onRequest(context) {
   if (context.request.method === 'OPTIONS') return corsPreflight();

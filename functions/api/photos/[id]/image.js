@@ -1,4 +1,4 @@
-import { json, corsPreflight, getKV } from '../../_lib/cors.js';
+import { json, corsPreflight, getKV } from '../../../_lib/cors.js';
 
 export async function onRequest(context) {
   if (context.request.method === 'OPTIONS') return corsPreflight();
