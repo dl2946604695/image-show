@@ -9,4 +9,4 @@ pages_build_output_dir = "dist"
 #   ［可选］环境变量：JWT_SECRET（自定义密钥）、WEGENT_API_KEY（AI 真实模型，留空则用内置示例回复）
 [[kv_namespaces]]
 binding = "PHOTO_STORE"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "9c09d0baa73744c79ca7bfabc86afcba"
