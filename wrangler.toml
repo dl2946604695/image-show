@@ -1,3 +1,12 @@
 name = "image-show"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
+
+# Cloudflare Pages Functions 所需的 KV 存储（用户 / 照片 / 分类 / 上传图片）
+# 首次部署前，请在 Cloudflare 控制台创建一个 KV 命名空间（例如 photo-store），
+# 并把它的 ID 填到下面的 id 字段；同时在 Pages 项目设置中添加绑定：
+#   Variable name = PHOTO_STORE
+#   ［可选］环境变量：JWT_SECRET（自定义密钥）、WEGENT_API_KEY（AI 真实模型，留空则用内置示例回复）
+[[kv_namespaces]]
+binding = "PHOTO_STORE"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
