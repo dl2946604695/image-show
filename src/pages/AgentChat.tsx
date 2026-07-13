@@ -186,7 +186,9 @@ export function AgentChat() {
 
   const autoGrow = (el: HTMLTextAreaElement) => {
     el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+    el.style.height = el.scrollHeight + 'px';
+    if (el.scrollHeight > 200) el.style.overflowY = 'scroll';
+    else el.style.overflowY = 'hidden';
   };
 
   const startNewChat = () => {
@@ -300,7 +302,7 @@ export function AgentChat() {
       >
         <p className="text-[16px] leading-relaxed text-[#e5e2e1]" style={{ fontFamily: 'Manrope' }}>
           欢迎回来。你上次关注的是"构图基础"。你想继续探索引导线，还是尝试新主题，比如
-          <strong className="font-semibold text-[#e5e2e1]">黄金时刻光影</strong>？
+          <strong>黄金时刻光影</strong>？
         </p>
       </div>
     </div>
@@ -336,7 +338,7 @@ export function AgentChat() {
             ))}
             <button
               onClick={() => navigate('/agent')}
-              className="flex h-full items-center border-b-2 border-[#00daf3] text-[16px] leading-[1.6] text-[#00daf3] transition-colors"
+              className="flex h-full items-center border-b-2 border-[#00daf3] text-[16px] leading-[1.6] text-[#00daf3]"
               style={{ fontFamily: 'Manrope' }}
             >
               摄影老师 AI
@@ -564,7 +566,7 @@ export function AgentChat() {
                   onKeyDown={onKeyDown}
                   rows={1}
                   placeholder="询问摄影技巧、器材或构图..."
-                  className="flex-1 resize-none border-none bg-transparent px-2 py-3 text-[16px] leading-[1.6] text-[#e5e2e1] placeholder:text-[#bac9cc]/40 focus:ring-0"
+                  className="flex-1 resize-none border-none bg-transparent px-2 py-3 text-[#e5e2e1] placeholder:text-[#bac9cc]/40 focus:ring-0"
                   style={{ fontFamily: 'Manrope' }}
                 />
 
@@ -592,7 +594,7 @@ export function AgentChat() {
 
               {/* 底注 */}
               <p
-                className="mt-3 text-center text-[10px] uppercase tracking-widest text-[#bac9cc] opacity-40"
+                className="mt-3 text-center text-[10px] font-medium uppercase tracking-widest text-[#bac9cc] opacity-40"
                 style={{ fontFamily: 'Space Grotesk' }}
               >
                 由 CINEMATIC VISION ENGINE V4.2 提供技术支持
