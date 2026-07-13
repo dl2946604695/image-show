@@ -298,7 +298,7 @@ export function AgentChat() {
           glassCN,
         )}
       >
-        <p className="text-[15px] leading-relaxed text-[#e5e2e1]" style={{ fontFamily: 'Manrope' }}>
+        <p className="text-[16px] leading-relaxed text-[#e5e2e1]" style={{ fontFamily: 'Manrope' }}>
           欢迎回来。你上次关注的是"构图基础"。你想继续探索引导线，还是尝试新主题，比如
           <strong className="font-semibold text-[#e5e2e1]">黄金时刻光影</strong>？
         </p>
@@ -328,7 +328,7 @@ export function AgentChat() {
               <button
                 key={label}
                 onClick={() => navigate('/')}
-                className="flex h-full items-center text-[16px] leading-[1.6] text-[#bac9cc] transition hover:text-[#00daf3]"
+                className="flex h-full items-center text-[16px] leading-[1.6] text-[#bac9cc] transition-colors hover:text-[#00daf3]"
                 style={{ fontFamily: 'Manrope' }}
               >
                 {label}
@@ -336,7 +336,7 @@ export function AgentChat() {
             ))}
             <button
               onClick={() => navigate('/agent')}
-              className="flex h-full items-center border-b-2 border-[#00daf3] text-[16px] leading-[1.6] text-[#00daf3]"
+              className="flex h-full items-center border-b-2 border-[#00daf3] text-[16px] leading-[1.6] text-[#00daf3] transition-colors"
               style={{ fontFamily: 'Manrope' }}
             >
               摄影老师 AI
@@ -344,7 +344,7 @@ export function AgentChat() {
           </nav>
 
           {/* 汉堡菜单 */}
-          <button className="text-[#bac9cc] transition hover:text-[#c3f5ff]">
+          <button className="text-[#bac9cc] transition-colors hover:text-[#c3f5ff]">
             <Menu className="h-5 w-5" />
           </button>
         </div>
@@ -381,7 +381,7 @@ export function AgentChat() {
                   )}
                 >
                   <item.icon className="h-5 w-5 shrink-0" />
-                  <span className="truncate text-[14px]" style={{ fontFamily: 'Manrope' }}>
+                  <span className="truncate text-[16px] leading-[1.6]" style={{ fontFamily: 'Manrope' }}>
                     {item.label}
                   </span>
                 </button>
@@ -393,7 +393,7 @@ export function AgentChat() {
           <div className="mt-4 px-2">
             <button
               onClick={startNewChat}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c3f5ff] px-4 py-3 text-[15px] font-semibold text-[#00363d] transition hover:brightness-110 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c3f5ff] py-3 text-[15px] font-semibold leading-[1.0] text-[#00363d] transition hover:brightness-110 active:scale-[0.98]"
               style={{ fontFamily: 'Manrope' }}
             >
               <Plus className="h-4 w-4" />
@@ -412,7 +412,7 @@ export function AgentChat() {
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[#bac9cc] transition hover:bg-[#353534]/50"
               >
                 <item.icon className="h-5 w-5" />
-                <span className="text-[14px]" style={{ fontFamily: 'Manrope' }}>
+                <span className="text-[16px] leading-[1.6]" style={{ fontFamily: 'Manrope' }}>
                   {item.label}
                 </span>
               </button>
@@ -432,7 +432,7 @@ export function AgentChat() {
                 <>
                   {/* ── 欢迎标题 ── */}
                   <div className="mb-8 text-center">
-                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[#c3f5ff]/20 bg-[#c3f5ff]/10">
+                    <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full border border-[#c3f5ff]/20 bg-[#c3f5ff]/10">
                       <Sparkles className="h-7 w-7 text-[#c3f5ff]" />
                     </div>
                     <h1
@@ -466,13 +466,13 @@ export function AgentChat() {
                       >
                         <c.icon className="mb-4 h-6 w-6 text-[#c3f5ff]" />
                         <h4
-                          className="text-[15px] font-semibold text-[#e5e2e1] transition group-hover:text-[#c3f5ff]"
+                          className="text-[15px] font-semibold leading-[1.0] text-[#e5e2e1] transition-colors group-hover:text-[#c3f5ff]"
                           style={{ fontFamily: 'Manrope' }}
                         >
                           {c.title}
                         </h4>
                         <p
-                          className="mt-2 text-[14px] text-[#bac9cc] opacity-70"
+                          className="mt-2 text-sm text-[#bac9cc] opacity-70"
                           style={{ fontFamily: 'Manrope' }}
                         >
                           {c.desc}
@@ -509,9 +509,9 @@ export function AgentChat() {
                         className={cn(
                           'max-w-[85%]',
                           m.sender === 'user'
-                            ? 'rounded-2xl rounded-tr-sm bg-[#1a1a1a] px-5 py-3 text-[15px] text-white'
+                            ? 'rounded-2xl rounded-tr-sm bg-[#1a1a1a] px-5 py-3 text-[16px] text-white'
                             : cn(
-                                'rounded-2xl rounded-tl-none border-l-2 border-l-[#c3f5ff] p-6 text-[15px] leading-relaxed text-[#e5e2e1]',
+                                'rounded-2xl rounded-tl-none border-l-2 border-l-[#c3f5ff] p-6 text-[16px] leading-relaxed text-[#e5e2e1]',
                                 glassCN,
                               ),
                         )}
@@ -564,7 +564,7 @@ export function AgentChat() {
                   onKeyDown={onKeyDown}
                   rows={1}
                   placeholder="询问摄影技巧、器材或构图..."
-                  className="flex-1 resize-none border-none bg-transparent px-2 py-3 text-[15px] text-[#e5e2e1] placeholder:text-[#bac9cc]/40 focus:ring-0"
+                  className="flex-1 resize-none border-none bg-transparent px-2 py-3 text-[16px] leading-[1.6] text-[#e5e2e1] placeholder:text-[#bac9cc]/40 focus:ring-0"
                   style={{ fontFamily: 'Manrope' }}
                 />
 
@@ -592,7 +592,7 @@ export function AgentChat() {
 
               {/* 底注 */}
               <p
-                className="mt-3 text-center text-[10px] uppercase tracking-[0.15em] text-[#bac9cc] opacity-40"
+                className="mt-3 text-center text-[10px] uppercase tracking-widest text-[#bac9cc] opacity-40"
                 style={{ fontFamily: 'Space Grotesk' }}
               >
                 由 CINEMATIC VISION ENGINE V4.2 提供技术支持
