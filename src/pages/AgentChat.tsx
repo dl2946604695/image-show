@@ -1,22 +1,5 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Sparkles,
-  User,
-  Aperture,
-  Compass,
-  Plus,
-  ImagePlus,
-  ArrowUp,
-  LayoutGrid,
-  Sun,
-  Palette,
-  Images,
-  Settings,
-  HelpCircle,
-  Menu,
-  Loader2,
-} from 'lucide-react';
 import { API_BASE_URL } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -27,14 +10,14 @@ interface Message {
 }
 
 interface QuickCard {
-  icon: typeof User;
+  icon: string;
   title: string;
   desc: string;
   prompt: string;
 }
 
 interface HistoryItem {
-  icon: typeof LayoutGrid;
+  icon: string;
   label: string;
   active?: boolean;
 }
@@ -42,50 +25,48 @@ interface HistoryItem {
 const HEADER_ITEMS = ['发现', '精选', '摄影师'];
 
 const HISTORY_ITEMS: HistoryItem[] = [
-  { icon: LayoutGrid, label: '构图基础', active: true },
-  { icon: Sun, label: '光影大师课' },
-  { icon: Palette, label: '色彩理论' },
-  { icon: Images, label: '作品集评估' },
+  { icon: 'grid_view', label: '构图基础', active: true },
+  { icon: 'light_mode', label: '光影大师课' },
+  { icon: 'palette', label: '色彩理论' },
+  { icon: 'photo_library', label: '作品集评估' },
 ];
 
 const QUICK_CARDS: QuickCard[] = [
   {
-    icon: User,
+    icon: 'person',
     title: '人像构图建议',
     desc: '掌握三分法法则与平视连接技巧',
     prompt: '请讲讲人像构图中的三分法法则与平视连接技巧。',
   },
   {
-    icon: Aperture,
+    icon: 'shutter_speed',
     title: '长曝光拍摄技巧',
     desc: '在风光与星空摄影中捕捉流动的光影',
     prompt: '长曝光拍摄有什么技巧？如何在风光和星空摄影中使用？',
   },
   {
-    icon: Compass,
+    icon: 'streetview',
     title: '街头摄影基础',
     desc: '学习捕捉瞬间的艺术与几何构图',
     prompt: '街头摄影有哪些基础的构图技巧和抓拍瞬间的方法？',
   },
 ];
 
+type Block =
+  | { type: 'p'; text: string }
+  | { type: 'ul'; items: string[] }
+  | { type: 'ol'; items: string[] };
+
 function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, index) =>
     part.startsWith('**') && part.endsWith('**') ? (
-      <strong key={index} className="font-semibold text-[#e5e2e1]">
-        {part.slice(2, -2)}
-      </strong>
+      <strong key={index}>{part.slice(2, -2)}</strong>
     ) : (
       <span key={index}>{part}</span>
     ),
   );
 }
-
-type Block =
-  | { type: 'p'; text: string }
-  | { type: 'ul'; items: string[] }
-  | { type: 'ol'; items: string[] };
 
 function parseBlocks(text: string): Block[] {
   const lines = text.split('\n');
@@ -141,7 +122,7 @@ function Markdown({ text }: { text: string }) {
           <ul key={index} className="space-y-2">
             {block.items.map((item, itemIndex) => (
               <li key={itemIndex} className="flex gap-2">
-                <span className="mt-[10px] h-1 w-1 shrink-0 rounded-full bg-[#8a8a8a]" />
+                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/50" />
                 <span>{renderInline(item)}</span>
               </li>
             ))}
@@ -150,32 +131,18 @@ function Markdown({ text }: { text: string }) {
           <ol key={index} className="space-y-2">
             {block.items.map((item, itemIndex) => (
               <li key={itemIndex} className="flex gap-2">
-                <span className="text-[#8a8a8a]">{itemIndex + 1}.</span>
+                <span>{itemIndex + 1}.</span>
                 <span>{renderInline(item)}</span>
               </li>
             ))}
           </ol>
         ) : (
-          <p key={index} className="whitespace-pre-wrap leading-relaxed">
+          <p key={index} className="whitespace-pre-wrap">
             {renderInline(block.text)}
           </p>
         ),
       )}
     </div>
-  );
-}
-
-function TypingDots() {
-  return (
-    <span className="flex gap-1 py-2">
-      {['0ms', '150ms', '300ms'].map((delay) => (
-        <span
-          key={delay}
-          className="h-2 w-2 animate-bounce rounded-full bg-[#c3f5ff]/70"
-          style={{ animationDelay: delay }}
-        />
-      ))}
-    </span>
   );
 }
 
@@ -191,13 +158,19 @@ export function AgentChat() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    document.documentElement.classList.add('dark');
+    document.title = '摄影老师 AI | 光影集';
+  }, []);
+
+  useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
 
   const autoGrow = (element: HTMLTextAreaElement) => {
     element.style.height = 'auto';
     element.style.height = `${element.scrollHeight}px`;
-    element.style.overflowY = element.scrollHeight > 200 ? 'scroll' : 'hidden';
+    if (element.scrollHeight > 200) element.style.overflowY = 'scroll';
+    else element.style.overflowY = 'hidden';
   };
 
   const startNewChat = () => {
@@ -218,6 +191,7 @@ export function AgentChat() {
 
       setStarted(true);
       setInput('');
+
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
@@ -228,6 +202,7 @@ export function AgentChat() {
         sender: 'user',
       };
       const agentId = crypto.randomUUID();
+
       setMessages((prev) => [...prev, userMessage, { id: agentId, content: '', sender: 'agent' }]);
       setLoading(true);
 
@@ -298,62 +273,56 @@ export function AgentChat() {
     [input, loading],
   );
 
-  const onKeyDown = (event: React.KeyboardEvent) => {
+  const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       send();
     }
   };
 
-  const glassPanel =
-    'bg-[rgba(19,19,19,0.7)] backdrop-blur-[24px] border border-white/[0.05]';
-
   return (
-    <div className="min-h-screen bg-[#131313] text-[#e5e2e1] selection:bg-[#c3f5ff]/30">
-      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#131313]/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
-          <div className="flex items-center gap-2">
+    <div className="bg-background text-on-background font-body-md selection:bg-primary/30 min-h-screen flex flex-col">
+      <header className="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10">
+        <div className="flex justify-between items-center h-16 px-gutter max-w-container-max mx-auto">
+          <div className="flex items-center gap-unit">
             <button
+              className="font-headline-md text-headline-md text-on-surface dark:text-on-surface tracking-tight"
               onClick={() => navigate('/')}
-              className="font-['Noto_Serif_SC'] text-[32px] font-semibold leading-[1.4] tracking-tight text-[#e5e2e1]"
             >
               光影集
             </button>
           </div>
 
-          <nav className="hidden h-full items-center gap-8 md:flex">
+          <nav className="hidden md:flex items-center gap-stack-md h-full">
             {HEADER_ITEMS.map((item) => (
               <button
                 key={item}
+                className="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors relative h-full flex items-center"
                 onClick={() => navigate('/')}
-                className="flex h-full items-center font-['Manrope'] text-[16px] leading-[1.6] text-[#bac9cc] transition-colors hover:text-[#00daf3]"
               >
                 {item}
               </button>
             ))}
             <button
+              className="font-body-md text-body-md text-primary dark:text-primary-fixed-dim border-b-2 border-primary dark:border-primary-fixed-dim h-full flex items-center"
               onClick={() => navigate('/agent')}
-              className="flex h-full items-center border-b-2 border-[#00daf3] font-['Manrope'] text-[16px] leading-[1.6] text-[#00daf3]"
             >
               摄影老师 AI
             </button>
           </nav>
 
           <div className="flex items-center gap-4">
-            <button
-              aria-label="打开菜单"
-              className="text-[#bac9cc] transition-colors hover:text-[#00daf3]"
-            >
-              <Menu className="h-5 w-5" />
+            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">
+              menu
             </button>
           </div>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden pt-16">
-        <aside className="hidden h-[calc(100vh-64px)] w-64 flex-col gap-2 border-r border-white/5 bg-[#1c1b1b] p-4 lg:flex">
+      <div className="flex flex-1 pt-16 overflow-hidden">
+        <aside className="hidden lg:flex flex-col h-[calc(100vh-64px)] w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-white/5 p-4 gap-unit">
           <div className="px-2 py-4">
-            <h3 className="mb-4 font-['Space_Grotesk'] text-[14px] font-medium uppercase leading-none tracking-[0.2em] text-[#bac9cc] opacity-60">
+            <h3 className="font-label-caps text-label-caps text-on-surface-variant opacity-60 mb-4">
               历史记录
             </h3>
             <div className="space-y-1">
@@ -361,17 +330,16 @@ export function AgentChat() {
                 <button
                   key={item.label}
                   className={cn(
-                    'w-full rounded-lg px-3 py-2 text-left transition-all',
-                    'flex items-center gap-3',
+                    'w-full flex items-center gap-3 px-3 py-2 rounded-lg group transition-all',
                     item.active
-                      ? 'bg-[#454747] text-[#b4b5b5]'
-                      : 'text-[#bac9cc] hover:bg-[#353534]/50',
+                      ? 'bg-secondary-container dark:bg-secondary-container text-on-secondary-container'
+                      : 'text-on-surface-variant hover:bg-surface-variant/50',
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="truncate font-['Manrope'] text-[16px] leading-[1.6]">
-                    {item.label}
+                  <span className="material-symbols-outlined text-[20px]" data-icon={item.icon}>
+                    {item.icon}
                   </span>
+                  <span className="font-body-md text-body-md truncate">{item.label}</span>
                 </button>
               ))}
             </div>
@@ -379,129 +347,123 @@ export function AgentChat() {
 
           <div className="mt-4 px-2">
             <button
+              className="w-full py-3 bg-primary text-on-primary rounded-xl font-ui-button text-ui-button flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all"
               onClick={startNewChat}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c3f5ff] py-3 font-['Manrope'] text-[15px] font-semibold leading-none text-[#00363d] transition-all hover:brightness-110 active:scale-[0.98]"
             >
-              <Plus className="h-4 w-4" />
+              <span className="material-symbols-outlined" data-icon="add">
+                add
+              </span>
               开启新对话
             </button>
           </div>
 
-          <div className="mt-auto space-y-1 px-2 pb-4">
+          <div className="mt-auto px-2 pb-4 space-y-1">
             {[
-              { icon: Settings, label: '设置' },
-              { icon: HelpCircle, label: '帮助' },
+              { icon: 'settings', label: '设置' },
+              { icon: 'help_outline', label: '帮助' },
             ].map((item) => (
               <button
                 key={item.label}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[#bac9cc] transition-all hover:bg-[#353534]/50"
+                className="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all"
               >
-                <item.icon className="h-5 w-5" />
-                <span className="font-['Manrope'] text-[16px] leading-[1.6]">{item.label}</span>
+                <span className="material-symbols-outlined text-[20px]" data-icon={item.icon}>
+                  {item.icon}
+                </span>
+                <span className="font-body-md text-body-md">{item.label}</span>
               </button>
             ))}
           </div>
         </aside>
 
-        <main className="relative flex h-full flex-1 flex-col overflow-hidden bg-[#131313]">
-          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" />
+        <main className="flex-1 relative flex flex-col h-full bg-background overflow-hidden">
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none"></div>
 
-          <div
-            ref={scrollRef}
-            className="relative z-10 flex-1 overflow-y-auto px-6 py-20 agent-scroll"
-          >
-            <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+          <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-gutter py-section-padding">
+            <div className="max-w-3xl mx-auto w-full flex flex-col gap-stack-md">
               {!started ? (
                 <>
-                  <div className="mb-8 text-center">
-                    <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full border border-[#c3f5ff]/20 bg-[#c3f5ff]/10">
-                      <Sparkles className="h-8 w-8 text-[#c3f5ff]" />
+                  <div className="text-center mb-stack-md">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border border-primary/20 mb-6 mx-auto">
+                      <span
+                        className="material-symbols-outlined text-primary text-4xl"
+                        data-icon="auto_awesome"
+                        data-weight="fill"
+                      >
+                        auto_awesome
+                      </span>
                     </div>
-                    <h1 className="mb-3 font-['Noto_Serif_SC'] text-[32px] font-semibold leading-[1.4] text-[#e5e2e1] [text-shadow:0_0_15px_rgba(0,218,243,0.4)]">
+                    <h1 className="font-headline-md text-headline-md text-on-surface mb-3 cyan-glow">
                       你好，我是你的摄影老师 AI。
                     </h1>
-                    <p className="mx-auto max-w-xl font-['Manrope'] text-[18px] font-normal leading-[1.6] tracking-[0.01em] text-[#bac9cc]">
+                    <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
                       今天我该如何协助你提升视觉叙事能力？你可以询问关于构图、光影的问题，或者上传照片进行分析。
                     </p>
                   </div>
 
-                  <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-stack-md">
                     {QUICK_CARDS.map((card) => (
                       <button
                         key={card.title}
+                        className="group p-6 glass-panel rounded-2xl text-left hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98]"
                         onClick={() => send(card.prompt)}
-                        className={cn(
-                          'group rounded-2xl p-6 text-left transition-all active:scale-[0.98]',
-                          'hover:border-[#c3f5ff]/40 hover:bg-[#c3f5ff]/5',
-                          glassPanel,
-                        )}
                       >
-                        <card.icon className="mb-4 block h-6 w-6 text-[#c3f5ff]" />
-                        <h4 className="font-['Manrope'] text-[15px] font-semibold leading-none text-[#e5e2e1] transition-colors group-hover:text-[#c3f5ff]">
+                        <span className="material-symbols-outlined text-primary mb-4 block" data-icon={card.icon}>
+                          {card.icon}
+                        </span>
+                        <h4 className="font-ui-button text-on-surface group-hover:text-primary transition-colors">
                           {card.title}
                         </h4>
-                        <p className="mt-2 font-['Manrope'] text-sm text-[#bac9cc] opacity-70">
-                          {card.desc}
-                        </p>
+                        <p className="mt-2 text-sm text-on-surface-variant opacity-70">{card.desc}</p>
                       </button>
                     ))}
                   </div>
 
-                  <div className="space-y-8">
+                  <div className="space-y-stack-md">
                     <div className="flex items-start gap-4">
-                      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', glassPanel)}>
-                        <Sparkles className="h-5 w-5 text-[#c3f5ff]" />
+                      <div className="w-10 h-10 rounded-full glass-panel flex items-center justify-center flex-shrink-0">
+                        <span className="material-symbols-outlined text-primary text-xl" data-icon="auto_awesome">
+                          auto_awesome
+                        </span>
                       </div>
-                      <div
-                        className={cn(
-                          'max-w-[85%] rounded-2xl rounded-tl-none border-l-2 border-l-[#c3f5ff] p-6',
-                          glassPanel,
-                        )}
-                      >
-                        <p className="font-['Manrope'] text-[16px] leading-relaxed text-[#e5e2e1]">
+                      <div className="p-6 glass-panel rounded-2xl rounded-tl-none max-w-[85%] border-l-2 border-l-primary">
+                        <p className="text-body-md leading-relaxed text-on-surface">
                           欢迎回来。你上次关注的是“构图基础”。你想继续探索引导线，还是尝试新主题，比如
-                          <strong> 黄金时刻光影</strong>？
+                          <strong>黄金时刻光影</strong>？
                         </p>
                       </div>
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="space-y-8">
+                <div className="space-y-stack-md">
                   {messages.map((message) => (
                     <div
                       key={message.id}
                       className={cn(
-                        'message-fade flex gap-4',
-                        message.sender === 'user' ? 'justify-end' : 'justify-start',
+                        'flex items-start gap-4 message-fade',
+                        message.sender === 'user' ? 'justify-end' : '',
                       )}
                     >
                       {message.sender === 'agent' && (
-                        <div
-                          className={cn(
-                            'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
-                            glassPanel,
-                          )}
-                        >
-                          <Sparkles className="h-5 w-5 text-[#c3f5ff]" />
+                        <div className="w-10 h-10 rounded-full glass-panel flex items-center justify-center flex-shrink-0">
+                          <span className="material-symbols-outlined text-primary text-xl" data-icon="auto_awesome">
+                            auto_awesome
+                          </span>
                         </div>
                       )}
+
                       <div
                         className={cn(
-                          'max-w-[85%]',
-                          message.sender === 'user'
-                            ? 'rounded-2xl rounded-tr-sm bg-[#1a1a1a] px-5 py-3 text-[16px] text-white'
-                            : cn(
-                                'rounded-2xl rounded-tl-none border-l-2 border-l-[#c3f5ff] p-6 text-[16px] leading-relaxed text-[#e5e2e1]',
-                                glassPanel,
-                              ),
+                          message.sender === 'agent'
+                            ? 'p-6 glass-panel rounded-2xl rounded-tl-none max-w-[85%] border-l-2 border-l-primary text-body-md leading-relaxed text-on-surface'
+                            : 'max-w-[85%] rounded-2xl bg-surface-container-high text-on-surface px-5 py-4',
                         )}
                       >
                         {message.sender === 'agent' ? (
                           message.content ? (
                             <Markdown text={message.content} />
                           ) : (
-                            <TypingDots />
+                            <span className="material-symbols-outlined animate-spin">progress_activity</span>
                           )
                         ) : (
                           message.content
@@ -514,58 +476,44 @@ export function AgentChat() {
             </div>
           </div>
 
-          <div className="relative z-20 bg-gradient-to-t from-[#131313] via-[#131313] to-transparent px-6 pb-6 pt-4">
-            <div className="relative mx-auto w-full max-w-3xl">
-              <div
-                className={cn(
-                  'flex items-end gap-2 rounded-2xl p-2 shadow-2xl transition-all focus-within:ring-1 focus-within:ring-[#c3f5ff]/50',
-                  glassPanel,
-                )}
-              >
+          <div className="relative z-20 px-gutter pb-gutter pt-4 bg-gradient-to-t from-background via-background to-transparent">
+            <div className="max-w-3xl mx-auto w-full relative">
+              <div className="glass-panel rounded-2xl flex items-end p-2 gap-2 shadow-2xl focus-within:ring-1 focus-within:ring-primary/50 transition-all">
                 <button
+                  className="p-3 text-on-surface-variant hover:text-primary transition-colors rounded-xl"
                   title="上传照片"
-                  aria-label="上传照片"
-                  className="rounded-xl p-3 text-[#bac9cc] transition-colors hover:text-[#c3f5ff]"
                 >
-                  <ImagePlus className="h-5 w-5" />
+                  <span className="material-symbols-outlined" data-icon="add_photo_alternate">
+                    add_photo_alternate
+                  </span>
                 </button>
 
                 <textarea
                   ref={textareaRef}
+                  className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface py-3 px-2 resize-none placeholder:text-on-surface-variant/40"
+                  placeholder="询问摄影技巧、器材或构图..."
+                  rows={1}
                   value={input}
                   onChange={(event) => {
                     setInput(event.target.value);
                     autoGrow(event.target);
                   }}
                   onKeyDown={onKeyDown}
-                  rows={1}
-                  placeholder="询问摄影技巧、器材或构图..."
-                  className="flex-1 resize-none border-none bg-transparent px-2 py-3 text-[#e5e2e1] placeholder:text-[#bac9cc]/40 focus:outline-none focus:ring-0"
                 />
 
                 <button
+                  className="bg-primary hover:brightness-110 p-3 rounded-xl text-on-primary transition-all active:scale-95 shadow-lg shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                   onClick={() => (loading ? abortRef.current?.abort() : send())}
                   disabled={!loading && !input.trim()}
-                  aria-label={loading ? '停止生成' : '发送'}
-                  className={cn(
-                    'rounded-xl p-3 transition-all active:scale-95 shadow-lg shadow-[#c3f5ff]/20',
-                    loading
-                      ? 'bg-[#454747] text-[#e5e2e1] hover:bg-[#575959]'
-                      : input.trim()
-                        ? 'bg-[#c3f5ff] text-[#00363d] hover:brightness-110'
-                        : 'cursor-not-allowed bg-[#2e2f2f] text-[#6d7476]',
-                  )}
                 >
-                  {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <ArrowUp className="h-5 w-5" />
-                  )}
+                  <span className="material-symbols-outlined" data-icon={loading ? 'progress_activity' : 'arrow_upward'}>
+                    {loading ? 'progress_activity' : 'arrow_upward'}
+                  </span>
                 </button>
               </div>
 
               <div className="mt-3 flex justify-center gap-4">
-                <span className="font-['Space_Grotesk'] text-[10px] font-medium uppercase tracking-widest text-[#bac9cc] opacity-40">
+                <span className="text-[10px] font-label-caps text-on-surface-variant opacity-40 uppercase tracking-widest">
                   由 CINEMATIC VISION ENGINE V4.2 提供技术支持
                 </span>
               </div>
@@ -575,21 +523,46 @@ export function AgentChat() {
       </div>
 
       <style>{`
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+          vertical-align: middle;
+        }
+
+        .glass-panel {
+          background: rgba(19, 19, 19, 0.7);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cyan-glow {
+          text-shadow: 0 0 15px rgba(0, 218, 243, 0.4);
+        }
+
         .message-fade {
           animation: fadeIn 0.25s ease-out;
         }
 
-        .agent-scroll::-webkit-scrollbar {
+        ::-webkit-scrollbar {
           width: 4px;
         }
 
-        .agent-scroll::-webkit-scrollbar-track {
+        ::-webkit-scrollbar-track {
           background: transparent;
         }
 
-        .agent-scroll::-webkit-scrollbar-thumb {
+        ::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 10px;
+        }
+
+        .active-tab-indicator {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: #00daf3;
         }
 
         @keyframes fadeIn {
