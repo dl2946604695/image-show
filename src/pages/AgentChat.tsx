@@ -303,8 +303,8 @@ export function AgentChat() {
     <div className="min-h-screen bg-bg pb-20 pt-[92px] text-[#e9f0f2]">
       <div className="container-60">
         <div className="overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#0b0c0e] shadow-[0_30px_80px_rgba(0,0,0,0.32)]">
-          <div className="flex min-h-[calc(100vh-132px)]">
-            <aside className="hidden w-[190px] flex-col border-r border-white/[0.06] bg-[linear-gradient(180deg,#1a1818_0%,#171616_100%)] px-4 py-5 lg:flex">
+          <div className="flex min-h-[760px]">
+            <aside className="hidden w-[184px] shrink-0 flex-col border-r border-white/[0.06] bg-[linear-gradient(180deg,#1a1818_0%,#171616_100%)] px-4 py-5 lg:flex">
             <div>
               <div className="mb-4 text-[13px] font-medium text-[#7f888c]">历史记录</div>
               <div className="space-y-1">
@@ -351,21 +351,21 @@ export function AgentChat() {
             </div>
             </aside>
 
-            <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-[#0b0c0e]">
+            <main className="relative flex min-w-0 flex-1 flex-col bg-[#0b0c0e]">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(18,34,40,0.2),transparent_35%)]" />
 
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-7 pb-8 pt-14">
-                <div className="mx-auto flex w-full max-w-[560px] flex-col">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 pb-8 pt-14 lg:px-12">
+                <div className="mx-auto flex w-full max-w-[592px] flex-col">
                   {!started ? (
                     <>
                       <div className="text-center">
-                        <div className="mx-auto mb-7 flex h-[56px] w-[56px] items-center justify-center rounded-full border border-[#c3f5ff]/20 bg-[#172126] shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
-                          <Sparkles className="h-6 w-6 text-[#c3f5ff]" />
+                        <div className="mx-auto mb-8 flex h-[60px] w-[60px] items-center justify-center rounded-full border border-[#c3f5ff]/18 bg-[#172126] shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+                          <Sparkles className="h-[25px] w-[25px] text-[#c3f5ff]" />
                         </div>
-                        <h1 className="mb-4 font-['Noto_Serif_SC'] text-[31px] font-semibold leading-[1.35] text-[#f2fbfd] [text-shadow:0_0_14px_rgba(0,218,243,0.35)]">
+                        <h1 className="mb-4 font-['Noto_Serif_SC'] text-[32px] font-semibold leading-[1.35] text-[#f2fbfd] [text-shadow:0_0_14px_rgba(0,218,243,0.35)]">
                           你好，我是你的摄影老师 AI。
                         </h1>
-                        <p className="mx-auto max-w-[540px] text-[15px] leading-8 text-[#bfcbcf]">
+                        <p className="mx-auto max-w-[500px] text-[15px] leading-8 text-[#bfcbcf]">
                           今天我该如何协助你提升视觉叙事能力？你可以询问关于构图、光影的问题，或者上传照片进行分析。
                         </p>
                       </div>
@@ -375,22 +375,22 @@ export function AgentChat() {
                           <button
                             key={card.title}
                             onClick={() => send(card.prompt)}
-                            className="group rounded-[16px] border border-white/[0.06] bg-[rgba(13,14,17,0.86)] px-5 py-5 text-left shadow-[0_12px_28px_rgba(0,0,0,0.2)] transition hover:border-[#204951] hover:bg-[rgba(16,18,21,0.94)]"
+                            className="group flex min-h-[112px] flex-col rounded-[16px] border border-white/[0.05] bg-[rgba(13,14,17,0.82)] px-4 py-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.18)] transition hover:border-[#204951] hover:bg-[rgba(16,18,21,0.92)]"
                           >
-                            <card.icon className="mb-4 h-[18px] w-[18px] text-[#d7f7ff]" />
-                            <h3 className="text-[16px] font-semibold leading-7 text-[#f0f4f5] group-hover:text-white">
+                            <card.icon className="mb-4 h-[17px] w-[17px] text-[#d7f7ff]" />
+                            <h3 className="text-[15px] font-semibold leading-7 text-[#f0f4f5] group-hover:text-white">
                               {card.title}
                             </h3>
-                            <p className="mt-2 text-[14px] leading-7 text-[#8c989d]">{card.desc}</p>
+                            <p className="mt-1.5 text-[13px] leading-6 text-[#8c989d]">{card.desc}</p>
                           </button>
                         ))}
                       </div>
 
-                      <div className="mt-14 flex items-start gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
+                      <div className="mt-16 flex items-start gap-4">
+                        <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
                           <Sparkles className="h-[17px] w-[17px] text-[#c3f5ff]" />
                         </div>
-                        <div className="flex-1 rounded-[18px] rounded-tl-[4px] border border-white/[0.05] border-l-[#9ceeff] bg-[rgba(12,14,16,0.88)] px-5 py-5 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
+                        <div className="min-h-[88px] flex-1 rounded-[18px] rounded-tl-[4px] border border-white/[0.05] border-l-[#9ceeff] bg-[rgba(12,14,16,0.88)] px-5 py-4 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
                           <p className="text-[15px] font-medium leading-8 text-[#edf2f3]">
                             欢迎回来。你上次关注的是“构图基础”。你想继续探索引导线，还是尝试新主题，比如
                             <strong className="font-semibold text-white">黄金时刻光影</strong>？
@@ -409,7 +409,7 @@ export function AgentChat() {
                           )}
                         >
                           {message.sender === 'agent' && (
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
+                            <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
                               <Sparkles className="h-[17px] w-[17px] text-[#c3f5ff]" />
                             </div>
                           )}
@@ -439,8 +439,8 @@ export function AgentChat() {
                 </div>
               </div>
 
-              <div className="px-7 pb-6 pt-4">
-                <div className="mx-auto w-full max-w-[560px]">
+              <div className="mt-auto border-t border-white/[0.03] px-8 pb-6 pt-6 lg:px-12">
+                <div className="mx-auto w-full max-w-[592px]">
                   <div className="rounded-[16px] border border-white/[0.05] bg-[rgba(12,14,16,0.92)] p-2 shadow-[0_12px_36px_rgba(0,0,0,0.38)]">
                     <div className="flex items-end gap-2">
                       <button
