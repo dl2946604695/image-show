@@ -1,5 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Aperture,
+  ArrowUp,
+  Compass,
+  HelpCircle,
+  ImagePlus,
+  Images,
+  LayoutGrid,
+  Menu,
+  Palette,
+  Plus,
+  Settings,
+  Sparkles,
+  Sun,
+  User,
+} from 'lucide-react';
 import { API_BASE_URL } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -10,14 +26,14 @@ interface Message {
 }
 
 interface QuickCard {
-  icon: string;
+  icon: typeof User;
   title: string;
   desc: string;
   prompt: string;
 }
 
 interface HistoryItem {
-  icon: string;
+  icon: typeof LayoutGrid;
   label: string;
   active?: boolean;
 }
@@ -25,27 +41,27 @@ interface HistoryItem {
 const HEADER_ITEMS = ['发现', '精选', '摄影师'];
 
 const HISTORY_ITEMS: HistoryItem[] = [
-  { icon: 'grid_view', label: '构图基础', active: true },
-  { icon: 'light_mode', label: '光影大师课' },
-  { icon: 'palette', label: '色彩理论' },
-  { icon: 'photo_library', label: '作品集评估' },
+  { icon: LayoutGrid, label: '构图基础', active: true },
+  { icon: Sun, label: '光影大师课' },
+  { icon: Palette, label: '色彩理论' },
+  { icon: Images, label: '作品集评估' },
 ];
 
 const QUICK_CARDS: QuickCard[] = [
   {
-    icon: 'person',
+    icon: User,
     title: '人像构图建议',
     desc: '掌握三分法法则与平视连接技巧',
     prompt: '请讲讲人像构图中的三分法法则与平视连接技巧。',
   },
   {
-    icon: 'shutter_speed',
+    icon: Aperture,
     title: '长曝光拍摄技巧',
     desc: '在风光与星空摄影中捕捉流动的光影',
     prompt: '长曝光拍摄有什么技巧？如何在风光和星空摄影中使用？',
   },
   {
-    icon: 'streetview',
+    icon: Compass,
     title: '街头摄影基础',
     desc: '学习捕捉瞬间的艺术与几何构图',
     prompt: '街头摄影有哪些基础的构图技巧和抓拍瞬间的方法？',
@@ -61,7 +77,9 @@ function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, index) =>
     part.startsWith('**') && part.endsWith('**') ? (
-      <strong key={index}>{part.slice(2, -2)}</strong>
+      <strong key={index} className="font-semibold text-white">
+        {part.slice(2, -2)}
+      </strong>
     ) : (
       <span key={index}>{part}</span>
     ),
@@ -121,8 +139,8 @@ function Markdown({ text }: { text: string }) {
         block.type === 'ul' ? (
           <ul key={index} className="space-y-2">
             {block.items.map((item, itemIndex) => (
-              <li key={itemIndex} className="flex gap-2">
-                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/50" />
+              <li key={itemIndex} className="flex gap-3">
+                <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#9addec]" />
                 <span>{renderInline(item)}</span>
               </li>
             ))}
@@ -130,19 +148,33 @@ function Markdown({ text }: { text: string }) {
         ) : block.type === 'ol' ? (
           <ol key={index} className="space-y-2">
             {block.items.map((item, itemIndex) => (
-              <li key={itemIndex} className="flex gap-2">
-                <span>{itemIndex + 1}.</span>
+              <li key={itemIndex} className="flex gap-3">
+                <span className="text-[#9addec]">{itemIndex + 1}.</span>
                 <span>{renderInline(item)}</span>
               </li>
             ))}
           </ol>
         ) : (
-          <p key={index} className="whitespace-pre-wrap">
+          <p key={index} className="whitespace-pre-wrap leading-7">
             {renderInline(block.text)}
           </p>
         ),
       )}
     </div>
+  );
+}
+
+function TypingDots() {
+  return (
+    <span className="flex gap-1.5 py-2">
+      {['0ms', '150ms', '300ms'].map((delay) => (
+        <span
+          key={delay}
+          className="h-2 w-2 animate-bounce rounded-full bg-[#c3f5ff]"
+          style={{ animationDelay: delay }}
+        />
+      ))}
+    </span>
   );
 }
 
@@ -158,7 +190,6 @@ export function AgentChat() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    document.documentElement.classList.add('dark');
     document.title = '摄影老师 AI | 光影集';
   }, []);
 
@@ -169,8 +200,7 @@ export function AgentChat() {
   const autoGrow = (element: HTMLTextAreaElement) => {
     element.style.height = 'auto';
     element.style.height = `${element.scrollHeight}px`;
-    if (element.scrollHeight > 200) element.style.overflowY = 'scroll';
-    else element.style.overflowY = 'hidden';
+    element.style.overflowY = element.scrollHeight > 200 ? 'auto' : 'hidden';
   };
 
   const startNewChat = () => {
@@ -191,18 +221,12 @@ export function AgentChat() {
 
       setStarted(true);
       setInput('');
-
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
 
-      const userMessage: Message = {
-        id: crypto.randomUUID(),
-        content,
-        sender: 'user',
-      };
+      const userMessage: Message = { id: crypto.randomUUID(), content, sender: 'user' };
       const agentId = crypto.randomUUID();
-
       setMessages((prev) => [...prev, userMessage, { id: agentId, content: '', sender: 'agent' }]);
       setLoading(true);
 
@@ -260,7 +284,7 @@ export function AgentChat() {
           setMessages((prev) =>
             prev.map((message) =>
               message.id === agentId && message.content === ''
-                ? { ...message, content: '抱歉，我暂时无法回答你的问题。' }
+                ? { ...message, content: '抱歉，我暂时无法回答你的问题，请稍后再试。' }
                 : message,
             ),
           );
@@ -281,288 +305,229 @@ export function AgentChat() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body-md selection:bg-primary/30 min-h-screen flex flex-col">
-      <header className="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10">
-        <div className="flex justify-between items-center h-16 px-gutter max-w-container-max mx-auto">
-          <div className="flex items-center gap-unit">
-            <button
-              className="font-headline-md text-headline-md text-on-surface dark:text-on-surface tracking-tight"
-              onClick={() => navigate('/')}
-            >
-              光影集
-            </button>
-          </div>
+    <div className="min-h-screen bg-[#090a0c] text-[#e9f0f2]">
+      <div className="mx-auto min-h-screen max-w-[960px] overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#0b0c0e] shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+        <header className="flex h-[50px] items-center justify-between border-b border-white/[0.06] bg-[rgba(16,17,19,0.96)] px-5">
+          <button
+            onClick={() => navigate('/')}
+            className="font-['Noto_Serif_SC'] text-[18px] font-semibold text-white"
+          >
+            光影集
+          </button>
 
-          <nav className="hidden md:flex items-center gap-stack-md h-full">
+          <nav className="hidden h-full items-center gap-8 md:flex">
             {HEADER_ITEMS.map((item) => (
               <button
                 key={item}
-                className="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors relative h-full flex items-center"
                 onClick={() => navigate('/')}
+                className="flex h-full items-center border-b-2 border-transparent text-[14px] text-[#afb7bb] transition hover:text-white"
               >
                 {item}
               </button>
             ))}
             <button
-              className="font-body-md text-body-md text-primary dark:text-primary-fixed-dim border-b-2 border-primary dark:border-primary-fixed-dim h-full flex items-center"
               onClick={() => navigate('/agent')}
+              className="flex h-full items-center border-b-2 border-[#00daf3] text-[14px] font-medium text-[#00daf3]"
             >
               摄影老师 AI
             </button>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">
-              menu
-            </button>
-          </div>
-        </div>
-      </header>
+          <button className="rounded-md p-2 text-[#b8c1c6] transition hover:bg-white/[0.04] hover:text-white">
+            <Menu className="h-4.5 w-4.5" />
+          </button>
+        </header>
 
-      <div className="flex flex-1 pt-16 overflow-hidden">
-        <aside className="hidden lg:flex flex-col h-[calc(100vh-64px)] w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-white/5 p-4 gap-unit">
-          <div className="px-2 py-4">
-            <h3 className="font-label-caps text-label-caps text-on-surface-variant opacity-60 mb-4">
-              历史记录
-            </h3>
-            <div className="space-y-1">
-              {HISTORY_ITEMS.map((item) => (
+        <div className="flex min-h-[calc(100vh-50px)]">
+          <aside className="hidden w-[190px] flex-col border-r border-white/[0.06] bg-[linear-gradient(180deg,#1a1818_0%,#171616_100%)] px-4 py-5 lg:flex">
+            <div>
+              <div className="mb-4 text-[13px] font-medium text-[#7f888c]">历史记录</div>
+              <div className="space-y-1">
+                {HISTORY_ITEMS.map((item) => (
+                  <button
+                    key={item.label}
+                    className={cn(
+                      'flex w-full items-center gap-3 rounded-[10px] px-3 py-[9px] text-left text-[15px] transition',
+                      item.active
+                        ? 'bg-[#4d5053] text-[#eef3f4]'
+                        : 'text-[#c0c8cb] hover:bg-white/[0.04] hover:text-white',
+                    )}
+                  >
+                    <item.icon className="h-[15px] w-[15px] shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <button
+                onClick={startNewChat}
+                className="flex h-[38px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#c8f4ff] text-[14px] font-semibold text-[#0b3138] transition hover:brightness-105"
+              >
+                <Plus className="h-4 w-4" />
+                开启新对话
+              </button>
+            </div>
+
+            <div className="mt-auto space-y-1 pb-2">
+              {[
+                { icon: Settings, label: '设置' },
+                { icon: HelpCircle, label: '帮助' },
+              ].map((item) => (
                 <button
                   key={item.label}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2 rounded-lg group transition-all',
-                    item.active
-                      ? 'bg-secondary-container dark:bg-secondary-container text-on-secondary-container'
-                      : 'text-on-surface-variant hover:bg-surface-variant/50',
-                  )}
+                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-[9px] text-left text-[15px] text-[#c0c8cb] transition hover:bg-white/[0.04] hover:text-white"
                 >
-                  <span className="material-symbols-outlined text-[20px]" data-icon={item.icon}>
-                    {item.icon}
-                  </span>
-                  <span className="font-body-md text-body-md truncate">{item.label}</span>
+                  <item.icon className="h-[15px] w-[15px] shrink-0" />
+                  <span>{item.label}</span>
                 </button>
               ))}
             </div>
-          </div>
+          </aside>
 
-          <div className="mt-4 px-2">
-            <button
-              className="w-full py-3 bg-primary text-on-primary rounded-xl font-ui-button text-ui-button flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all"
-              onClick={startNewChat}
-            >
-              <span className="material-symbols-outlined" data-icon="add">
-                add
-              </span>
-              开启新对话
-            </button>
-          </div>
+          <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-[#0b0c0e]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(18,34,40,0.2),transparent_35%)]" />
 
-          <div className="mt-auto px-2 pb-4 space-y-1">
-            {[
-              { icon: 'settings', label: '设置' },
-              { icon: 'help_outline', label: '帮助' },
-            ].map((item) => (
-              <button
-                key={item.label}
-                className="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]" data-icon={item.icon}>
-                  {item.icon}
-                </span>
-                <span className="font-body-md text-body-md">{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </aside>
-
-        <main className="flex-1 relative flex flex-col h-full bg-background overflow-hidden">
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none"></div>
-
-          <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-gutter py-section-padding">
-            <div className="max-w-3xl mx-auto w-full flex flex-col gap-stack-md">
-              {!started ? (
-                <>
-                  <div className="text-center mb-stack-md">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border border-primary/20 mb-6 mx-auto">
-                      <span
-                        className="material-symbols-outlined text-primary text-4xl"
-                        data-icon="auto_awesome"
-                        data-weight="fill"
-                      >
-                        auto_awesome
-                      </span>
-                    </div>
-                    <h1 className="font-headline-md text-headline-md text-on-surface mb-3 cyan-glow">
-                      你好，我是你的摄影老师 AI。
-                    </h1>
-                    <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
-                      今天我该如何协助你提升视觉叙事能力？你可以询问关于构图、光影的问题，或者上传照片进行分析。
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-stack-md">
-                    {QUICK_CARDS.map((card) => (
-                      <button
-                        key={card.title}
-                        className="group p-6 glass-panel rounded-2xl text-left hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98]"
-                        onClick={() => send(card.prompt)}
-                      >
-                        <span className="material-symbols-outlined text-primary mb-4 block" data-icon={card.icon}>
-                          {card.icon}
-                        </span>
-                        <h4 className="font-ui-button text-on-surface group-hover:text-primary transition-colors">
-                          {card.title}
-                        </h4>
-                        <p className="mt-2 text-sm text-on-surface-variant opacity-70">{card.desc}</p>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="space-y-stack-md">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full glass-panel flex items-center justify-center flex-shrink-0">
-                        <span className="material-symbols-outlined text-primary text-xl" data-icon="auto_awesome">
-                          auto_awesome
-                        </span>
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-7 pb-8 pt-14">
+              <div className="mx-auto flex w-full max-w-[560px] flex-col">
+                {!started ? (
+                  <>
+                    <div className="text-center">
+                      <div className="mx-auto mb-7 flex h-[56px] w-[56px] items-center justify-center rounded-full border border-[#c3f5ff]/20 bg-[#172126] shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
+                        <Sparkles className="h-6 w-6 text-[#c3f5ff]" />
                       </div>
-                      <div className="p-6 glass-panel rounded-2xl rounded-tl-none max-w-[85%] border-l-2 border-l-primary">
-                        <p className="text-body-md leading-relaxed text-on-surface">
+                      <h1 className="mb-4 font-['Noto_Serif_SC'] text-[31px] font-semibold leading-[1.35] text-[#f2fbfd] [text-shadow:0_0_14px_rgba(0,218,243,0.35)]">
+                        你好，我是你的摄影老师 AI。
+                      </h1>
+                      <p className="mx-auto max-w-[540px] text-[15px] leading-8 text-[#bfcbcf]">
+                        今天我该如何协助你提升视觉叙事能力？你可以询问关于构图、光影的问题，或者上传照片进行分析。
+                      </p>
+                    </div>
+
+                    <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+                      {QUICK_CARDS.map((card) => (
+                        <button
+                          key={card.title}
+                          onClick={() => send(card.prompt)}
+                          className="group rounded-[16px] border border-white/[0.06] bg-[rgba(13,14,17,0.86)] px-5 py-5 text-left shadow-[0_12px_28px_rgba(0,0,0,0.2)] transition hover:border-[#204951] hover:bg-[rgba(16,18,21,0.94)]"
+                        >
+                          <card.icon className="mb-4 h-[18px] w-[18px] text-[#d7f7ff]" />
+                          <h3 className="text-[16px] font-semibold leading-7 text-[#f0f4f5] group-hover:text-white">
+                            {card.title}
+                          </h3>
+                          <p className="mt-2 text-[14px] leading-7 text-[#8c989d]">{card.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="mt-14 flex items-start gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
+                        <Sparkles className="h-[17px] w-[17px] text-[#c3f5ff]" />
+                      </div>
+                      <div className="flex-1 rounded-[18px] rounded-tl-[4px] border border-white/[0.05] border-l-[#9ceeff] bg-[rgba(12,14,16,0.88)] px-5 py-5 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
+                        <p className="text-[15px] font-medium leading-8 text-[#edf2f3]">
                           欢迎回来。你上次关注的是“构图基础”。你想继续探索引导线，还是尝试新主题，比如
-                          <strong>黄金时刻光影</strong>？
+                          <strong className="font-semibold text-white">黄金时刻光影</strong>？
                         </p>
                       </div>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <div className="space-y-stack-md">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={cn(
-                        'flex items-start gap-4 message-fade',
-                        message.sender === 'user' ? 'justify-end' : '',
-                      )}
-                    >
-                      {message.sender === 'agent' && (
-                        <div className="w-10 h-10 rounded-full glass-panel flex items-center justify-center flex-shrink-0">
-                          <span className="material-symbols-outlined text-primary text-xl" data-icon="auto_awesome">
-                            auto_awesome
-                          </span>
-                        </div>
-                      )}
-
+                  </>
+                ) : (
+                  <div className="space-y-7 pt-2">
+                    {messages.map((message) => (
                       <div
+                        key={message.id}
                         className={cn(
-                          message.sender === 'agent'
-                            ? 'p-6 glass-panel rounded-2xl rounded-tl-none max-w-[85%] border-l-2 border-l-primary text-body-md leading-relaxed text-on-surface'
-                            : 'max-w-[85%] rounded-2xl bg-surface-container-high text-on-surface px-5 py-4',
+                          'message-fade flex gap-4',
+                          message.sender === 'user' ? 'justify-end' : 'justify-start',
                         )}
                       >
-                        {message.sender === 'agent' ? (
-                          message.content ? (
-                            <Markdown text={message.content} />
-                          ) : (
-                            <span className="material-symbols-outlined animate-spin">progress_activity</span>
-                          )
-                        ) : (
-                          message.content
+                        {message.sender === 'agent' && (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
+                            <Sparkles className="h-[17px] w-[17px] text-[#c3f5ff]" />
+                          </div>
                         )}
+
+                        <div
+                          className={cn(
+                            'max-w-[85%]',
+                            message.sender === 'user'
+                              ? 'rounded-[16px] rounded-tr-[6px] bg-[#171b1e] px-5 py-4 text-[15px] leading-7 text-white'
+                              : 'rounded-[18px] rounded-tl-[4px] border border-white/[0.05] border-l-[#9ceeff] bg-[rgba(12,14,16,0.88)] px-5 py-5 text-[15px] leading-7 text-[#e5edef]',
+                          )}
+                        >
+                          {message.sender === 'agent' ? (
+                            message.content ? (
+                              <Markdown text={message.content} />
+                            ) : (
+                              <TypingDots />
+                            )
+                          ) : (
+                            message.content
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="px-7 pb-6 pt-4">
+              <div className="mx-auto w-full max-w-[560px]">
+                <div className="rounded-[16px] border border-white/[0.05] bg-[rgba(12,14,16,0.92)] p-2 shadow-[0_12px_36px_rgba(0,0,0,0.38)]">
+                  <div className="flex items-end gap-2">
+                    <button
+                      title="上传照片"
+                      aria-label="上传照片"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] text-[#7e8a90] transition hover:bg-white/[0.04] hover:text-[#c3f5ff]"
+                    >
+                      <ImagePlus className="h-[18px] w-[18px]" />
+                    </button>
+
+                    <textarea
+                      ref={textareaRef}
+                      value={input}
+                      onChange={(event) => {
+                        setInput(event.target.value);
+                        autoGrow(event.target);
+                      }}
+                      onKeyDown={onKeyDown}
+                      rows={1}
+                      placeholder="询问摄影技巧、器材或构图..."
+                      className="min-h-[44px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-[11px] text-[15px] leading-7 text-[#eef3f5] placeholder:text-[#616b70] focus:outline-none"
+                    />
+
+                    <button
+                      onClick={() => (loading ? abortRef.current?.abort() : send())}
+                      disabled={!loading && !input.trim()}
+                      className={cn(
+                        'flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] transition',
+                        loading
+                          ? 'bg-[#334046] text-white'
+                          : input.trim()
+                            ? 'bg-[#c3f5ff] text-[#0b3138] shadow-[0_6px_18px_rgba(195,245,255,0.28)] hover:brightness-105'
+                            : 'cursor-not-allowed bg-[#273035] text-[#667075]',
+                      )}
+                    >
+                      <ArrowUp className="h-[18px] w-[18px]" strokeWidth={2.6} />
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
 
-          <div className="relative z-20 px-gutter pb-gutter pt-4 bg-gradient-to-t from-background via-background to-transparent">
-            <div className="max-w-3xl mx-auto w-full relative">
-              <div className="glass-panel rounded-2xl flex items-end p-2 gap-2 shadow-2xl focus-within:ring-1 focus-within:ring-primary/50 transition-all">
-                <button
-                  className="p-3 text-on-surface-variant hover:text-primary transition-colors rounded-xl"
-                  title="上传照片"
-                >
-                  <span className="material-symbols-outlined" data-icon="add_photo_alternate">
-                    add_photo_alternate
-                  </span>
-                </button>
-
-                <textarea
-                  ref={textareaRef}
-                  className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface py-3 px-2 resize-none placeholder:text-on-surface-variant/40"
-                  placeholder="询问摄影技巧、器材或构图..."
-                  rows={1}
-                  value={input}
-                  onChange={(event) => {
-                    setInput(event.target.value);
-                    autoGrow(event.target);
-                  }}
-                  onKeyDown={onKeyDown}
-                />
-
-                <button
-                  className="bg-primary hover:brightness-110 p-3 rounded-xl text-on-primary transition-all active:scale-95 shadow-lg shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
-                  onClick={() => (loading ? abortRef.current?.abort() : send())}
-                  disabled={!loading && !input.trim()}
-                >
-                  <span className="material-symbols-outlined" data-icon={loading ? 'progress_activity' : 'arrow_upward'}>
-                    {loading ? 'progress_activity' : 'arrow_upward'}
-                  </span>
-                </button>
-              </div>
-
-              <div className="mt-3 flex justify-center gap-4">
-                <span className="text-[10px] font-label-caps text-on-surface-variant opacity-40 uppercase tracking-widest">
+                <p className="mt-3 text-center text-[9px] font-medium uppercase tracking-[0.22em] text-[#4e565a]">
                   由 CINEMATIC VISION ENGINE V4.2 提供技术支持
-                </span>
+                </p>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       <style>{`
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-          vertical-align: middle;
-        }
-
-        .glass-panel {
-          background: rgba(19, 19, 19, 0.7);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .cyan-glow {
-          text-shadow: 0 0 15px rgba(0, 218, 243, 0.4);
-        }
-
         .message-fade {
-          animation: fadeIn 0.25s ease-out;
-        }
-
-        ::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        ::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-
-        .active-tab-indicator {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: #00daf3;
+          animation: fadeIn 0.24s ease-out;
         }
 
         @keyframes fadeIn {
