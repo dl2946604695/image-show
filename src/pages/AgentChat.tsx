@@ -224,6 +224,13 @@ export function AgentChat() {
       }
 
       const userMessage: Message = { id: crypto.randomUUID(), content, sender: 'user' };
+      const contextMessages = [...messages, userMessage]
+        .filter((message) => message.content.trim())
+        .slice(-8)
+        .map((message) => ({
+          role: message.sender === 'user' ? 'user' : 'assistant',
+          content: message.content,
+        }));
       const agentId = crypto.randomUUID();
       setMessages((prev) => [...prev, userMessage, { id: agentId, content: '', sender: 'agent' }]);
       setLoading(true);
@@ -235,7 +242,7 @@ export function AgentChat() {
         const response = await fetch(`${API_BASE_URL}/agent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: content }),
+          body: JSON.stringify({ message: content, messages: contextMessages }),
           signal: controller.signal,
         });
 
@@ -296,7 +303,7 @@ export function AgentChat() {
         abortRef.current = null;
       }
     },
-    [input, loading],
+    [input, loading, messages],
   );
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
