@@ -1,0 +1,186 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500&amp;family=Manrope:wght@400;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#00e5ff",
+                        "on-primary": "#00363d",
+                        "background": "#131313",
+                        "surface": "#131313",
+                        "surface-container": "#201f1f",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container-highest": "#353534",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#bac9cc",
+                        "outline": "#3b494c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sidebar": "256px",
+                        "gutter": "24px",
+                        "stack-md": "32px",
+                        "section-padding": "80px"
+                    },
+                    "fontFamily": {
+                        "serif": ["Noto Serif", "serif"],
+                        "sans": ["Manrope", "Inter", "system-ui", "sans-serif"],
+                        "display": ["Noto Serif", "serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                },
+            },
+        }
+    }catch(_e){}</script></head><body>
+<div class="main-container">
+<!-- Header -->
+<header class="h-16 glass-effect flex items-center justify-between px-8 z-50 shrink-0">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl" data-original-icon="photo_camera">photo_camera</span>
+</div>
+<span class="font-serif text-xl font-bold tracking-tight text-on-surface">光影集</span>
+</div>
+<nav class="hidden md:flex items-center bg-surface-container-low rounded-full px-1 py-1 border border-white/5">
+<a href="#" class="px-5 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">探索</a>
+<a href="#" class="px-5 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">精选</a>
+<a href="#" class="px-5 py-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">摄影师</a>
+<a href="#" class="px-5 py-1.5 text-sm font-medium bg-surface-container-highest text-white rounded-full">摄影老师 AI</a>
+</nav>
+<button class="p-2 text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<div class="chat-container overflow-hidden">
+<!-- Sidebar (Inside Central Container) -->
+<aside class="w-64 border-r border-white/5 flex flex-col bg-surface-container-low shrink-0">
+<div class="p-6">
+<h2 class="font-serif text-lg font-bold text-on-surface mb-1">历史记录</h2>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest opacity-60">最近的对话</p>
+</div>
+<nav class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary">grid_view</span>
+<span class="text-sm font-medium">构图基础</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary">wb_sunny</span>
+<span class="text-sm font-medium">光影大师课</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary">palette</span>
+<span class="text-sm font-medium">色彩理论</span>
+</a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary">photo_library</span>
+<span class="text-sm font-medium">作品集评估</span>
+</a>
+</nav>
+<div class="p-4 border-t border-white/5 space-y-2">
+<button class="w-full py-2.5 bg-primary text-on-primary font-bold rounded flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 shadow-[0_0_20px_rgba(0,229,255,0.15)] text-sm">
+<span class="material-symbols-outlined text-lg">add</span>
+                        开启新对话
+                    </button>
+<div class="flex flex-col">
+<a class="flex items-center gap-3 p-2 text-on-surface-variant hover:text-on-surface transition-all" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span class="text-xs font-medium">设置</span>
+</a>
+<a class="flex items-center gap-3 p-2 text-on-surface-variant hover:text-on-surface transition-all" href="#">
+<span class="material-symbols-outlined text-xl">help_outline</span>
+<span class="text-xs font-medium">帮助</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Chat Area -->
+<main class="flex-1 flex flex-col relative overflow-hidden">
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-12 pt-16 pb-32">
+<div class="max-w-4xl mx-auto space-y-16">
+<!-- Welcome Header -->
+<div class="text-center space-y-6">
+<h1 class="font-serif text-4xl md:text-5xl text-on-surface font-bold leading-tight">
+                                你好，我是你的摄影老师 AI。
+                            </h1>
+<p class="text-on-surface-variant text-lg opacity-80">
+                                今天我该如何协助你提升视觉叙事能力？
+                            </p>
+</div>
+<!-- Feature Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="feature-card p-6 rounded-lg flex flex-col items-center text-center cursor-pointer">
+<div class="w-12 h-12 mb-4 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">face</span>
+</div>
+<h3 class="font-serif text-base font-bold mb-2">人像构图建议</h3>
+<p class="text-on-surface-variant text-xs leading-relaxed">学习如何利用自然光，捕捉最具表现力的瞬间。</p>
+</div>
+<div class="feature-card p-6 rounded-lg flex flex-col items-center text-center cursor-pointer">
+<div class="w-12 h-12 mb-4 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">shutter_speed</span>
+</div>
+<h3 class="font-serif text-base font-bold mb-2">长曝光拍摄技巧</h3>
+<p class="text-on-surface-variant text-xs leading-relaxed">掌握流水的丝滑感与城市车轨的动感，理解时间的定格。</p>
+</div>
+<div class="feature-card p-6 rounded-lg flex flex-col items-center text-center cursor-pointer">
+<div class="w-12 h-12 mb-4 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">streetview</span>
+</div>
+<h3 class="font-serif text-base font-bold mb-2">街头摄影基础</h3>
+<p class="text-on-surface-variant text-xs leading-relaxed">在平凡中发现不凡，学习在复杂的街头环境里精准预判。</p>
+</div>
+</div>
+<!-- AI Message -->
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded bg-primary/20 flex-shrink-0 flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+</div>
+<div class="flex-1 max-w-2xl space-y-2">
+<div class="p-5 rounded-lg rounded-tl-none bg-surface-container-high border border-white/5 text-on-surface leading-relaxed text-sm shadow-xl">
+                                    欢迎回来！我已准备好协助你的创作。无论是针对构图技巧的深入讨论，还是对你最新摄影作品的专业点评，我们现在就可以开始。
+                                </div>
+<span class="text-[10px] text-on-surface-variant opacity-40 ml-1 uppercase tracking-widest font-label">刚才 • AI 摄影老师</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Fixed Input Area (Within central container) -->
+<div class="absolute bottom-0 left-0 right-0 p-6 md:p-10 pointer-events-none">
+<div class="max-w-3xl mx-auto pointer-events-auto">
+<div class="bg-surface-container-highest/80 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl p-2 flex items-center gap-2">
+<button class="p-3 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add_photo_alternate</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/30 py-3 text-sm" placeholder="询问摄影技巧、器材或构图..." type="text">
+<button class="w-12 h-12 rounded bg-primary text-on-primary flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<p class="mt-3 text-center text-[9px] text-on-surface-variant opacity-30 uppercase tracking-[0.4em] font-label">Powered by Light &amp; Shadow Intelligence</p>
+</div>
+</div>
+</main>
+</div>
+</div>
+<script>
+        const input = document.querySelector('input');
+        const container = input.closest('div');
+        
+        input.addEventListener('focus', () => {
+            container.classList.add('border-primary/40');
+            container.classList.remove('border-white/10');
+        });
+
+        input.addEventListener('blur', () => {
+            container.classList.remove('border-primary/40');
+            container.classList.add('border-white/10');
+        });
+    </script>
+</body></html>

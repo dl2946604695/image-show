@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Aperture,
   ArrowUp,
+  Bot,
   Compass,
   HelpCircle,
   ImagePlus,
@@ -11,6 +12,7 @@ import {
   Plus,
   Settings,
   Sparkles,
+  Square,
   Sun,
   User,
 } from 'lucide-react';
@@ -47,20 +49,20 @@ const QUICK_CARDS: QuickCard[] = [
   {
     icon: User,
     title: '人像构图建议',
-    desc: '掌握三分法法则与平视连接技巧',
-    prompt: '请讲讲人像构图中的三分法法则与平视连接技巧。',
+    desc: '学习如何利用自然光，捕捉最具表现力的瞬间。',
+    prompt: '请讲讲人像构图中的三分法、视线引导和自然光运用技巧。',
   },
   {
     icon: Aperture,
     title: '长曝光拍摄技巧',
-    desc: '在风光与星空摄影中捕捉流动的光影',
-    prompt: '长曝光拍摄有什么技巧？如何在风光和星空摄影中使用？',
+    desc: '掌握流水的丝滑感与城市车轨的动感。',
+    prompt: '长曝光拍摄有哪些关键技巧？如何在风光和城市夜景中使用？',
   },
   {
     icon: Compass,
     title: '街头摄影基础',
-    desc: '学习捕捉瞬间的艺术与几何构图',
-    prompt: '街头摄影有哪些基础的构图技巧和抓拍瞬间的方法？',
+    desc: '在平凡中发现不凡，学习复杂环境里的精准预判。',
+    prompt: '街头摄影有哪些基础构图技巧和抓拍瞬间的方法？',
   },
 ];
 
@@ -71,6 +73,7 @@ type Block =
 
 function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
   return parts.map((part, index) =>
     part.startsWith('**') && part.endsWith('**') ? (
       <strong key={index} className="font-semibold text-white">
@@ -136,7 +139,7 @@ function Markdown({ text }: { text: string }) {
           <ul key={index} className="space-y-2">
             {block.items.map((item, itemIndex) => (
               <li key={itemIndex} className="flex gap-3">
-                <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#9addec]" />
+                <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#00d4ff]" />
                 <span>{renderInline(item)}</span>
               </li>
             ))}
@@ -145,7 +148,7 @@ function Markdown({ text }: { text: string }) {
           <ol key={index} className="space-y-2">
             {block.items.map((item, itemIndex) => (
               <li key={itemIndex} className="flex gap-3">
-                <span className="text-[#9addec]">{itemIndex + 1}.</span>
+                <span className="text-[#00d4ff]">{itemIndex + 1}.</span>
                 <span>{renderInline(item)}</span>
               </li>
             ))}
@@ -166,7 +169,7 @@ function TypingDots() {
       {['0ms', '150ms', '300ms'].map((delay) => (
         <span
           key={delay}
-          className="h-2 w-2 animate-bounce rounded-full bg-[#c3f5ff]"
+          className="h-2 w-2 animate-bounce rounded-full bg-[#00d4ff]"
           style={{ animationDelay: delay }}
         />
       ))}
@@ -195,7 +198,7 @@ export function AgentChat() {
   const autoGrow = (element: HTMLTextAreaElement) => {
     element.style.height = 'auto';
     element.style.height = `${element.scrollHeight}px`;
-    element.style.overflowY = element.scrollHeight > 200 ? 'auto' : 'hidden';
+    element.style.overflowY = element.scrollHeight > 180 ? 'auto' : 'hidden';
   };
 
   const startNewChat = () => {
@@ -274,12 +277,16 @@ export function AgentChat() {
             }
           }
         }
-      } catch (error: any) {
-        if (error?.name !== 'AbortError') {
+      } catch (error: unknown) {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
           setMessages((prev) =>
             prev.map((message) =>
               message.id === agentId && message.content === ''
-                ? { ...message, content: '抱歉，我暂时无法回答你的问题，请稍后再试。' }
+                ? {
+                    ...message,
+                    content:
+                      '抱歉，我暂时无法回答你的问题。你可以稍后再试，或先描述拍摄场景、光线条件和想解决的摄影问题。',
+                  }
                 : message,
             ),
           );
@@ -300,195 +307,197 @@ export function AgentChat() {
   };
 
   return (
-    <div className="min-h-screen bg-bg pb-20 pt-[92px] text-[#e9f0f2]">
-      <div className="container-60">
-        <div className="overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#0b0c0e] shadow-[0_30px_80px_rgba(0,0,0,0.32)]">
-          <div className="flex min-h-[760px]">
-            <aside className="hidden w-[184px] shrink-0 flex-col border-r border-white/[0.06] bg-[linear-gradient(180deg,#1a1818_0%,#171616_100%)] px-4 py-5 lg:flex">
-            <div>
-              <div className="mb-4 text-[13px] font-medium text-[#7f888c]">历史记录</div>
-              <div className="space-y-1">
-                {HISTORY_ITEMS.map((item) => (
-                  <button
-                    key={item.label}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-[10px] px-3 py-[9px] text-left text-[15px] transition',
-                      item.active
-                        ? 'bg-[#4d5053] text-[#eef3f4]'
-                        : 'text-[#c0c8cb] hover:bg-white/[0.04] hover:text-white',
-                    )}
-                  >
-                    <item.icon className="h-[15px] w-[15px] shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+    <div className="agent-page">
+      <div className="agent-shell">
+        <aside className="agent-sidebar">
+          <div>
+            <h2 className="font-['Noto_Serif_SC'] text-[18px] font-semibold text-[#e5e2e1]">
+              历史记录
+            </h2>
+            <p className="mt-1 text-[10px] text-[#687174]">最近的对话</p>
+          </div>
 
-            <div className="mt-8">
+          <div className="agent-history-list">
+            {HISTORY_ITEMS.map((item) => (
               <button
-                onClick={startNewChat}
-                className="flex h-[38px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#c8f4ff] text-[14px] font-semibold text-[#0b3138] transition hover:brightness-105"
+                key={item.label}
+                className={cn('agent-history-button', item.active && 'agent-history-button-active')}
               >
-                <Plus className="h-4 w-4" />
-                开启新对话
+                <span
+                  className={cn('agent-history-icon', item.active && 'agent-history-icon-active')}
+                >
+                  <item.icon className="h-3.5 w-3.5" />
+                </span>
+                <span className="truncate">{item.label}</span>
               </button>
-            </div>
+            ))}
+          </div>
 
-            <div className="mt-auto space-y-1 pb-2">
+          <div className="agent-sidebar-footer">
+            <button
+              onClick={startNewChat}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-[9px] bg-[#00d4ff] text-[14px] font-bold text-[#001f24] shadow-[0_0_22px_rgba(0,212,255,0.16)] transition hover:brightness-105"
+            >
+              <Plus className="h-4 w-4" />
+              开启新对话
+            </button>
+
+            <div className="agent-sidebar-tools">
               {[
                 { icon: Settings, label: '设置' },
                 { icon: HelpCircle, label: '帮助' },
               ].map((item) => (
                 <button
                   key={item.label}
-                  className="flex w-full items-center gap-3 rounded-[10px] px-3 py-[9px] text-left text-[15px] text-[#c0c8cb] transition hover:bg-white/[0.04] hover:text-white"
+                  className="agent-sidebar-tool"
                 >
-                  <item.icon className="h-[15px] w-[15px] shrink-0" />
+                  <span className="agent-sidebar-tool-icon">
+                    <item.icon className="h-3 w-3" />
+                  </span>
                   <span>{item.label}</span>
                 </button>
               ))}
             </div>
-            </aside>
+          </div>
+        </aside>
 
-            <main className="relative flex min-w-0 flex-1 flex-col bg-[#0b0c0e]">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(18,34,40,0.2),transparent_35%)]" />
+        <main className="agent-main">
+          <div className="agent-left-gutter" />
+          <div className="agent-right-gutter" />
 
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 pb-8 pt-14 lg:px-12">
-                <div className="mx-auto flex w-full max-w-[592px] flex-col">
-                  {!started ? (
-                    <>
-                      <div className="text-center">
-                        <div className="mx-auto mb-8 flex h-[60px] w-[60px] items-center justify-center rounded-full border border-[#c3f5ff]/18 bg-[#172126] shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
-                          <Sparkles className="h-[25px] w-[25px] text-[#c3f5ff]" />
-                        </div>
-                        <h1 className="mb-4 font-['Noto_Serif_SC'] text-[32px] font-semibold leading-[1.35] text-[#f2fbfd] [text-shadow:0_0_14px_rgba(0,218,243,0.35)]">
-                          你好，我是你的摄影老师 AI。
-                        </h1>
-                        <p className="mx-auto max-w-[500px] text-[15px] leading-8 text-[#bfcbcf]">
-                          今天我该如何协助你提升视觉叙事能力？你可以询问关于构图、光影的问题，或者上传照片进行分析。
-                        </p>
-                      </div>
+          <div
+            ref={scrollRef}
+            className="agent-scroll"
+          >
+            <div className="agent-content">
+              {!started ? (
+                <div className="flex flex-1 flex-col">
+                  <section className="agent-hero">
+                    <h1 className="agent-title">
+                      你好，我是你的摄影老师 AI。
+                    </h1>
+                    <p className="agent-subtitle">
+                      今天我该如何协助你提升视觉叙事能力？
+                    </p>
+                  </section>
 
-                      <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
-                        {QUICK_CARDS.map((card) => (
-                          <button
-                            key={card.title}
-                            onClick={() => send(card.prompt)}
-                            className="group flex min-h-[112px] flex-col rounded-[16px] border border-white/[0.05] bg-[rgba(13,14,17,0.82)] px-4 py-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.18)] transition hover:border-[#204951] hover:bg-[rgba(16,18,21,0.92)]"
-                          >
-                            <card.icon className="mb-4 h-[17px] w-[17px] text-[#d7f7ff]" />
-                            <h3 className="text-[15px] font-semibold leading-7 text-[#f0f4f5] group-hover:text-white">
-                              {card.title}
-                            </h3>
-                            <p className="mt-1.5 text-[13px] leading-6 text-[#8c989d]">{card.desc}</p>
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="mt-16 flex items-start gap-4">
-                        <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
-                          <Sparkles className="h-[17px] w-[17px] text-[#c3f5ff]" />
-                        </div>
-                        <div className="min-h-[88px] flex-1 rounded-[18px] rounded-tl-[4px] border border-white/[0.05] border-l-[#9ceeff] bg-[rgba(12,14,16,0.88)] px-5 py-4 shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
-                          <p className="text-[15px] font-medium leading-8 text-[#edf2f3]">
-                            欢迎回来。你上次关注的是“构图基础”。你想继续探索引导线，还是尝试新主题，比如
-                            <strong className="font-semibold text-white">黄金时刻光影</strong>？
-                          </p>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="space-y-7 pt-2">
-                      {messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={cn(
-                            'message-fade flex gap-4',
-                            message.sender === 'user' ? 'justify-end' : 'justify-start',
-                          )}
-                        >
-                          {message.sender === 'agent' && (
-                            <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c3f5ff]/10 bg-[#10171b]">
-                              <Sparkles className="h-[17px] w-[17px] text-[#c3f5ff]" />
-                            </div>
-                          )}
-
-                          <div
-                            className={cn(
-                              'max-w-[85%]',
-                              message.sender === 'user'
-                                ? 'rounded-[16px] rounded-tr-[6px] bg-[#171b1e] px-5 py-4 text-[15px] leading-7 text-white'
-                                : 'rounded-[18px] rounded-tl-[4px] border border-white/[0.05] border-l-[#9ceeff] bg-[rgba(12,14,16,0.88)] px-5 py-5 text-[15px] leading-7 text-[#e5edef]',
-                            )}
-                          >
-                            {message.sender === 'agent' ? (
-                              message.content ? (
-                                <Markdown text={message.content} />
-                              ) : (
-                                <TypingDots />
-                              )
-                            ) : (
-                              message.content
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-auto border-t border-white/[0.03] px-8 pb-6 pt-6 lg:px-12">
-                <div className="mx-auto w-full max-w-[592px]">
-                  <div className="rounded-[16px] border border-white/[0.05] bg-[rgba(12,14,16,0.92)] p-2 shadow-[0_12px_36px_rgba(0,0,0,0.38)]">
-                    <div className="flex items-end gap-2">
+                  <section className="agent-quick-grid">
+                    {QUICK_CARDS.map((card) => (
                       <button
-                        title="上传照片"
-                        aria-label="上传照片"
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] text-[#7e8a90] transition hover:bg-white/[0.04] hover:text-[#c3f5ff]"
+                        key={card.title}
+                        onClick={() => send(card.prompt)}
+                        className="agent-quick-card"
                       >
-                        <ImagePlus className="h-[18px] w-[18px]" />
+                        <span className="agent-quick-icon">
+                          <card.icon className="h-5 w-5" />
+                        </span>
+                        <h3 className="agent-quick-title">{card.title}</h3>
+                        <p className="agent-quick-desc">{card.desc}</p>
                       </button>
+                    ))}
+                  </section>
 
-                      <textarea
-                        ref={textareaRef}
-                        value={input}
-                        onChange={(event) => {
-                          setInput(event.target.value);
-                          autoGrow(event.target);
-                        }}
-                        onKeyDown={onKeyDown}
-                        rows={1}
-                        placeholder="询问摄影技巧、器材或构图..."
-                        className="min-h-[44px] max-h-[180px] flex-1 resize-none bg-transparent px-2 py-[11px] text-[15px] leading-7 text-[#eef3f5] placeholder:text-[#616b70] focus:outline-none"
-                      />
+                  <section className="agent-welcome-row">
+                    <div className="agent-avatar">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div className="agent-welcome-bubble">
+                      欢迎回来，我已准备好协助你的创作。无论是针对构图技巧的深入讨论，还是对你最新摄影作品的专业点评，我们现在就可以开始。
+                    </div>
+                  </section>
+                  <p className="agent-welcome-meta">刚才 · AI 摄影老师</p>
+                </div>
+              ) : (
+                <div className="agent-chat-thread">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={cn('agent-message-row message-fade', message.sender === 'user' && 'agent-message-row-user')}
+                    >
+                      {message.sender === 'agent' && (
+                        <div className="agent-message-avatar">
+                          <Bot className="h-[18px] w-[18px]" />
+                        </div>
+                      )}
 
-                      <button
-                        onClick={() => (loading ? abortRef.current?.abort() : send())}
-                        disabled={!loading && !input.trim()}
+                      <div
                         className={cn(
-                          'flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] transition',
-                          loading
-                            ? 'bg-[#334046] text-white'
-                            : input.trim()
-                              ? 'bg-[#c3f5ff] text-[#0b3138] shadow-[0_6px_18px_rgba(195,245,255,0.28)] hover:brightness-105'
-                              : 'cursor-not-allowed bg-[#273035] text-[#667075]',
+                          'agent-message-bubble',
+                          message.sender === 'user' ? 'agent-message-bubble-user' : 'agent-message-bubble-ai',
                         )}
                       >
-                        <ArrowUp className="h-[18px] w-[18px]" strokeWidth={2.6} />
-                      </button>
+                        {message.sender === 'agent' ? (
+                          message.content ? (
+                            <Markdown text={message.content} />
+                          ) : (
+                            <TypingDots />
+                          )
+                        ) : (
+                          message.content
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
-                  <p className="mt-3 text-center text-[9px] font-medium uppercase tracking-[0.22em] text-[#4e565a]">
-                    由 CINEMATIC VISION ENGINE V4.2 提供技术支持
-                  </p>
+          <div className="agent-input-area">
+            <div className="agent-input-wrap">
+              <div className="agent-input-box">
+                <div className="agent-input-row">
+                  <button
+                    type="button"
+                    title="图片点评能力即将上线"
+                    aria-label="上传照片用于 AI 点评"
+                    className="agent-attach-button"
+                  >
+                    <ImagePlus className="h-[18px] w-[18px]" />
+                  </button>
+
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(event) => {
+                      setInput(event.target.value);
+                      autoGrow(event.target);
+                    }}
+                    onKeyDown={onKeyDown}
+                    rows={1}
+                    placeholder="询问摄影技巧、器材或构图..."
+                    className="agent-textarea"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => (loading ? abortRef.current?.abort() : send())}
+                    disabled={!loading && !input.trim()}
+                    aria-label={loading ? '停止生成' : '发送问题'}
+                    className={cn(
+                      'agent-send-button',
+                      loading
+                        ? 'agent-send-button-loading'
+                        : input.trim()
+                          ? 'agent-send-button-ready'
+                          : 'agent-send-button-disabled',
+                    )}
+                  >
+                    {loading ? (
+                      <Square className="h-4 w-4 fill-current" />
+                    ) : (
+                      <ArrowUp className="h-[18px] w-[18px]" strokeWidth={2.6} />
+                    )}
+                  </button>
                 </div>
               </div>
-            </main>
+
+              <p className="mt-3 text-center text-[9px] font-medium uppercase tracking-[0.34em] text-[#5f6466]">
+                Powered by Light & Shadow Intelligence
+              </p>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
 
       <style>{`
