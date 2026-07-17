@@ -186,6 +186,36 @@ function extractDelta(event) {
   return '';
 }
 
+function extractWegentText(payload) {
+  if (!payload || typeof payload !== 'object') return '';
+
+  if (typeof payload.output_text === 'string') return payload.output_text;
+  if (typeof payload.text === 'string') return payload.text;
+
+  const parts = [];
+  const output = Array.isArray(payload.output) ? payload.output : [];
+
+  for (const item of output) {
+    const content = Array.isArray(item?.content) ? item.content : [];
+
+    for (const block of content) {
+      if (typeof block?.text === 'string') {
+        parts.push(block.text);
+      } else if (typeof block?.output_text === 'string') {
+        parts.push(block.output_text);
+      } else if (typeof block?.content === 'string') {
+        parts.push(block.content);
+      }
+    }
+  }
+
+  const choiceContent =
+    payload.choices?.[0]?.message?.content || payload.choices?.[0]?.delta?.content;
+  if (!parts.length && typeof choiceContent === 'string') return choiceContent;
+
+  return parts.join('\n\n').trim();
+}
+
 async function streamWegentResponse(response) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder('utf-8');
@@ -290,13 +320,13 @@ export async function onRequest(context) {
     const response = await fetch(responsesUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         'X-API-Key': apiKey,
       },
       body: JSON.stringify({
         model,
         input: agentInput,
-        stream: true,
+        stream: false,
         tools: toolType ? [{ type: toolType }] : undefined,
       }),
     });
@@ -311,10 +341,28 @@ export async function onRequest(context) {
       return fallbackResponse(message, `upstream_${response.status}`, detail, messages);
     }
 
-    return new Response(await streamWegentResponse(response), {
+    let payload;
+    try {
+      payload = await response.json();
+    } catch {
+      return fallbackResponse(message, 'upstream_invalid_json', 'Wegent returned non-JSON response', messages);
+    }
+
+    const text = extractWegentText(payload);
+    if (!text) {
+      return fallbackResponse(
+        message,
+        'upstream_empty_text',
+        JSON.stringify(payload).slice(0, 300),
+        messages,
+      );
+    }
+
+    return new Response(mockStream(text), {
       headers: {
         ...SSE_HEADERS,
         'X-Agent-Mode': 'wegent',
+        'X-Agent-Upstream-Stream': 'false',
       },
     });
   } catch (error) {
