@@ -107,8 +107,21 @@ ${transcript}
 请回复用户最后一句：${message}`;
 }
 
+function cleanEnvValue(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+
+  const first = trimmed[0];
+  const last = trimmed[trimmed.length - 1];
+  if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+    return trimmed.slice(1, -1).trim();
+  }
+
+  return trimmed;
+}
+
 function getResponsesUrl(rawUrl) {
-  const url = String(rawUrl || '').trim().replace(/\/+$/, '');
+  const url = cleanEnvValue(rawUrl).replace(/\/+$/, '');
   if (!url) return '';
   return url.endsWith('/responses') ? url : `${url}/responses`;
 }
@@ -159,6 +172,8 @@ function fallbackResponse(message, reason, detail = '', messages = []) {
     headers: {
       ...SSE_HEADERS,
       'X-Agent-Mode': 'error',
+      'X-Agent-Env-Cleaning': 'enabled',
+      'X-Agent-Auth-Mode': 'x-api-key,bearer',
       'X-Agent-Fallback-Reason': reason,
       ...(safeDetail ? { 'X-Agent-Fallback-Detail': safeDetail } : {}),
     },
@@ -303,7 +318,7 @@ export async function onRequest(context) {
       });
     }
 
-    const apiKey = context.env.WEGENT_API_KEY;
+    const apiKey = cleanEnvValue(context.env.WEGENT_API_KEY);
     if (!apiKey) {
       return fallbackResponse(message, 'missing_api_key', '', messages);
     }
@@ -313,8 +328,8 @@ export async function onRequest(context) {
       return fallbackResponse(message, 'missing_base_url', '', messages);
     }
 
-    const model = context.env.WEGENT_MODEL || DEFAULT_WEGENT_MODEL;
-    const toolType = context.env.WEGENT_TOOL_TYPE || DEFAULT_WEGENT_TOOL_TYPE;
+    const model = cleanEnvValue(context.env.WEGENT_MODEL) || DEFAULT_WEGENT_MODEL;
+    const toolType = cleanEnvValue(context.env.WEGENT_TOOL_TYPE) || DEFAULT_WEGENT_TOOL_TYPE;
     const agentInput = buildAgentInput(message, messages);
 
     const response = await fetch(responsesUrl, {
@@ -322,6 +337,7 @@ export async function onRequest(context) {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'X-API-Key': apiKey,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
@@ -362,6 +378,8 @@ export async function onRequest(context) {
       headers: {
         ...SSE_HEADERS,
         'X-Agent-Mode': 'wegent',
+        'X-Agent-Env-Cleaning': 'enabled',
+        'X-Agent-Auth-Mode': 'x-api-key,bearer',
         'X-Agent-Upstream-Stream': 'false',
       },
     });
