@@ -15,7 +15,10 @@ const SSE_HEADERS = {
 
 const ZHIPU_CHAT_COMPLETIONS_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
 const DEFAULT_ZHIPU_MODEL = 'glm-4.7-flash';
+const DEFAULT_ZHIPU_FALLBACK_MODELS = ['glm-4.5-flash'];
 const DEFAULT_TEMPERATURE = 0.8;
+const DEFAULT_MAX_TOKENS = 4096;
+const DEFAULT_RETRY_COUNT = 2;
 
 const PHOTOGRAPHY_TEACHER_PROMPT = `你是“摄影老师 Agent”，一位耐心、专业、实战导向的中文摄影老师。
 
@@ -46,6 +49,23 @@ function cleanEnvValue(value) {
   }
 
   return trimmed;
+}
+
+function parseList(value) {
+  return cleanEnvValue(value)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function unique(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function clampInteger(value, fallback, min, max) {
+  const parsed = Number.parseInt(cleanEnvValue(value), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
 }
 
 function normalizeMessages(messages) {
@@ -103,6 +123,8 @@ function fallbackResponse(reason, detail = '') {
       ? '智谱 API Key 还没有配置，所以摄影老师 Agent 暂时不能连接真实模型。请在 Cloudflare Pages 环境变量中设置 ZHIPU_API_KEY。'
       : reason === 'missing_message'
         ? '请先输入一个摄影相关问题，例如“阴天怎么拍人像更通透？”或“50mm 镜头适合拍什么？”。'
+        : reason === 'model_overloaded'
+          ? '智谱模型当前访问量过大，我已经自动重试过了，但还是没有排到可用资源。请稍后再试，或在环境变量 ZHIPU_FALLBACK_MODELS 中配置一个备用模型。'
         : `摄影老师 Agent 调用智谱模型失败。错误原因：${reason}${safeDetail ? `，${safeDetail}` : ''}`;
 
   return new Response(mockStream(text), {
@@ -216,12 +238,85 @@ async function errorDetail(response) {
   }
 }
 
+function parseErrorPayload(detail) {
+  try {
+    return JSON.parse(detail);
+  } catch {
+    return null;
+  }
+}
+
+function isModelOverloaded(status, detail) {
+  if (status !== 429) return false;
+
+  const payload = parseErrorPayload(detail);
+  const code = String(payload?.error?.code || '');
+  const message = String(payload?.error?.message || detail || '');
+
+  return code === '1305' || message.includes('访问量过大') || message.toLowerCase().includes('too many');
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function getApiKey(env = {}) {
   return (
     cleanEnvValue(env.ZHIPU_API_KEY) ||
     cleanEnvValue(env.BIGMODEL_API_KEY) ||
     cleanEnvValue(env.GLM_API_KEY)
   );
+}
+
+async function requestZhipu({ apiKey, model, messages, temperature, maxTokens }) {
+  return fetch(ZHIPU_CHAT_COMPLETIONS_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature,
+      max_tokens: maxTokens,
+      stream: true,
+    }),
+  });
+}
+
+async function requestZhipuWithFallback({
+  apiKey,
+  models,
+  messages,
+  temperature,
+  maxTokens,
+  retryCount,
+}) {
+  let lastFailure = null;
+
+  for (const model of models) {
+    for (let attempt = 0; attempt <= retryCount; attempt++) {
+      const upstream = await requestZhipu({ apiKey, model, messages, temperature, maxTokens });
+
+      if (upstream.ok) {
+        return { upstream, model, fallbackUsed: model !== models[0] };
+      }
+
+      const detail = await errorDetail(upstream);
+      lastFailure = { status: upstream.status, detail, model };
+
+      if (!isModelOverloaded(upstream.status, detail)) {
+        return { failure: lastFailure };
+      }
+
+      if (attempt < retryCount) {
+        await delay(250 * (attempt + 1));
+      }
+    }
+  }
+
+  return { failure: lastFailure, overloaded: true };
 }
 
 export async function onRequest(context) {
@@ -247,34 +342,40 @@ export async function onRequest(context) {
     }
 
     const model = cleanEnvValue(context.env.ZHIPU_MODEL) || DEFAULT_ZHIPU_MODEL;
+    const fallbackModels = parseList(context.env.ZHIPU_FALLBACK_MODELS);
+    const models = unique([model, ...(fallbackModels.length ? fallbackModels : DEFAULT_ZHIPU_FALLBACK_MODELS)]);
     const temperature =
       Number.parseFloat(cleanEnvValue(context.env.ZHIPU_TEMPERATURE)) || DEFAULT_TEMPERATURE;
+    const maxTokens = clampInteger(context.env.ZHIPU_MAX_TOKENS, DEFAULT_MAX_TOKENS, 256, 8192);
+    const retryCount = clampInteger(context.env.ZHIPU_RETRY_COUNT, DEFAULT_RETRY_COUNT, 0, 3);
+    const zhipuMessages = buildZhipuMessages(message, body.messages);
 
-    const upstream = await fetch(ZHIPU_CHAT_COMPLETIONS_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      body: JSON.stringify({
-        model,
-        messages: buildZhipuMessages(message, body.messages),
-        temperature,
-        stream: true,
-      }),
+    const result = await requestZhipuWithFallback({
+      apiKey,
+      models,
+      messages: zhipuMessages,
+      temperature,
+      maxTokens,
+      retryCount,
     });
 
-    if (!upstream.ok) {
-      return fallbackResponse(`upstream_${upstream.status}`, await errorDetail(upstream));
+    if (result.failure) {
+      if (result.overloaded) {
+        return fallbackResponse('model_overloaded', result.failure.detail);
+      }
+
+      return fallbackResponse(`upstream_${result.failure.status}`, result.failure.detail);
     }
 
+    const { upstream } = result;
     const contentType = upstream.headers.get('content-type') || '';
     if (contentType.includes('text/event-stream')) {
       return new Response(await streamZhipuResponse(upstream), {
         headers: {
           ...SSE_HEADERS,
           'X-Agent-Mode': 'zhipu',
-          'X-Agent-Model': model,
+          'X-Agent-Model': result.model,
+          'X-Agent-Fallback-Used': String(result.fallbackUsed),
           'X-Agent-Upstream-Stream': 'true',
         },
       });
@@ -290,7 +391,8 @@ export async function onRequest(context) {
       headers: {
         ...SSE_HEADERS,
         'X-Agent-Mode': 'zhipu',
-        'X-Agent-Model': model,
+        'X-Agent-Model': result.model,
+        'X-Agent-Fallback-Used': String(result.fallbackUsed),
         'X-Agent-Upstream-Stream': 'false',
       },
     });
