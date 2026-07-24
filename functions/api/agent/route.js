@@ -17,7 +17,7 @@ const ZHIPU_CHAT_COMPLETIONS_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/co
 const DEFAULT_ZHIPU_MODEL = 'glm-4.7';
 const DEFAULT_ZHIPU_FALLBACK_MODELS = ['glm-4.5-flash'];
 const DEFAULT_TEMPERATURE = 0.7;
-const DEFAULT_MAX_TOKENS = 1200;
+const DEFAULT_MAX_TOKENS = 600;
 const DEFAULT_RETRY_COUNT = 1;
 
 const PHOTOGRAPHY_TEACHER_PROMPT = `你是“摄影老师 Agent”，一位耐心、专业、实战导向的中文摄影老师。
