@@ -5,6 +5,7 @@ const KEYS = {
   users: 'app:users',
   photos: 'app:photos',
   categories: 'app:categories',
+  chatHistory: 'app:chat_history',
 };
 
 export async function getJSON(kv, key, fallback) {
@@ -28,6 +29,8 @@ export const getPhotos = (kv) => getJSON(kv, KEYS.photos, []);
 export const setPhotos = (kv, v) => setJSON(kv, KEYS.photos, v);
 export const getCategories = (kv) => getJSON(kv, KEYS.categories, []);
 export const setCategories = (kv, v) => setJSON(kv, KEYS.categories, v);
+export const getChatHistory = (kv) => getJSON(kv, KEYS.chatHistory, []);
+export const setChatHistory = (kv, v) => setJSON(kv, KEYS.chatHistory, v);
 
 const SEED_CATEGORIES = [
   { id: '1', name: '风景', icon: 'mountain' },

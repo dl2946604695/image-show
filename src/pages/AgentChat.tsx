@@ -6,7 +6,6 @@ import {
   Compass,
   HelpCircle,
   ImagePlus,
-  Images,
   LayoutGrid,
   Palette,
   Plus,
@@ -15,14 +14,17 @@ import {
   Square,
   Sun,
   User,
+  Trash2,
 } from 'lucide-react';
-import { API_BASE_URL } from '@/lib/api';
+import { API_BASE_URL, getChatHistory, createChat, updateChat, deleteChat } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { ChatHistory as ChatHistoryType } from '@/types';
 
 interface Message {
   id: string;
   content: string;
   sender: 'user' | 'agent';
+  timestamp: string;
 }
 
 interface QuickCard {
@@ -31,19 +33,6 @@ interface QuickCard {
   desc: string;
   prompt: string;
 }
-
-interface HistoryItem {
-  icon: typeof LayoutGrid;
-  label: string;
-  active?: boolean;
-}
-
-const HISTORY_ITEMS: HistoryItem[] = [
-  { icon: LayoutGrid, label: '构图基础', active: true },
-  { icon: Sun, label: '光影大师课' },
-  { icon: Palette, label: '色彩理论' },
-  { icon: Images, label: '作品集评估' },
-];
 
 const QUICK_CARDS: QuickCard[] = [
   {
@@ -182,6 +171,9 @@ export function AgentChat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatHistoryType[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -195,22 +187,79 @@ export function AgentChat() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
 
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
+
+  const loadChatHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const result = await getChatHistory();
+      if (result.success) {
+        setChatHistory(result.data);
+      }
+    } catch {
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const autoGrow = (element: HTMLTextAreaElement) => {
     element.style.height = 'auto';
     element.style.height = `${element.scrollHeight}px`;
     element.style.overflowY = element.scrollHeight > 180 ? 'auto' : 'hidden';
   };
 
-  const startNewChat = () => {
+  const loadChat = useCallback((chat: ChatHistoryType) => {
+    setMessages(chat.messages);
+    setCurrentChatId(chat.id);
+    setStarted(true);
+    setInput('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+  }, []);
+
+  const startNewChat = useCallback(() => {
     abortRef.current?.abort();
     setMessages([]);
+    setCurrentChatId(null);
     setStarted(false);
     setLoading(false);
     setInput('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
-  };
+  }, []);
+
+  const saveMessages = useCallback(async (newMessages: Message[]) => {
+    if (newMessages.length === 0) return;
+
+    try {
+      if (currentChatId) {
+        await updateChat(currentChatId, newMessages);
+      } else {
+        const title = newMessages[0]?.content?.slice(0, 30) || '新对话';
+        const result = await createChat(newMessages, title);
+        if (result.success) {
+          setCurrentChatId(result.data.id);
+          setChatHistory((prev) => [result.data, ...prev]);
+        }
+      }
+    } catch {
+    }
+  }, [currentChatId]);
+
+  const deleteChatById = useCallback(async (chatId: string) => {
+    try {
+      await deleteChat(chatId);
+      setChatHistory((prev) => prev.filter((c) => c.id !== chatId));
+      if (currentChatId === chatId) {
+        startNewChat();
+      }
+    } catch {
+    }
+  }, [currentChatId, startNewChat]);
 
   const send = useCallback(
     async (text?: string) => {
@@ -223,7 +272,12 @@ export function AgentChat() {
         textareaRef.current.style.height = 'auto';
       }
 
-      const userMessage: Message = { id: crypto.randomUUID(), content, sender: 'user' };
+      const userMessage: Message = {
+        id: crypto.randomUUID(),
+        content,
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+      };
       const contextMessages = [...messages, userMessage]
         .filter((message) => message.content.trim())
         .slice(-8)
@@ -232,7 +286,12 @@ export function AgentChat() {
           content: message.content,
         }));
       const agentId = crypto.randomUUID();
-      setMessages((prev) => [...prev, userMessage, { id: agentId, content: '', sender: 'agent' }]);
+      const newMessages: Message[] = [
+        ...messages,
+        userMessage,
+        { id: agentId, content: '', sender: 'agent' as const, timestamp: new Date().toISOString() },
+      ];
+      setMessages(newMessages);
       setLoading(true);
 
       const controller = new AbortController();
@@ -284,6 +343,8 @@ export function AgentChat() {
             }
           }
         }
+
+        
       } catch (error: unknown) {
         if (!(error instanceof DOMException && error.name === 'AbortError')) {
           setMessages((prev) =>
@@ -303,14 +364,35 @@ export function AgentChat() {
         abortRef.current = null;
       }
     },
-    [input, loading, messages],
+    [input, loading, messages, saveMessages],
   );
+
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      saveMessages(messages);
+    }
+  }, [messages, loading, saveMessages]);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       send();
     }
+  };
+
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return '刚刚';
+    if (minutes < 60) return `${minutes}分钟前`;
+    if (hours < 24) return `${hours}小时前`;
+    if (days < 7) return `${days}天前`;
+    return date.toLocaleDateString('zh-CN');
   };
 
   return (
@@ -324,21 +406,44 @@ export function AgentChat() {
             <p className="mt-1 text-[10px] text-[#687174]">最近的对话</p>
           </div>
 
-          <div className="agent-history-list">
-            {HISTORY_ITEMS.map((item) => (
-              <button
-                key={item.label}
-                className={cn('agent-history-button', item.active && 'agent-history-button-active')}
-              >
-                <span
-                  className={cn('agent-history-icon', item.active && 'agent-history-icon-active')}
+          {loadingHistory ? (
+            <div className="mt-4 flex justify-center">
+              <div className="loading-spinner" />
+            </div>
+          ) : (
+            <div className="agent-history-list">
+              {chatHistory.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => loadChat(chat)}
+                  className={cn(
+                    'agent-history-button',
+                    currentChatId === chat.id && 'agent-history-button-active',
+                  )}
                 >
-                  <item.icon className="h-3.5 w-3.5" />
-                </span>
-                <span className="truncate">{item.label}</span>
-              </button>
-            ))}
-          </div>
+                  <span
+                    className={cn(
+                      'agent-history-icon',
+                      currentChatId === chat.id && 'agent-history-icon-active',
+                    )}
+                  >
+                    <LayoutGrid className="h-3.5 w-3.5" />
+                  </span>
+                  <span className="truncate">{chat.title}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteChatById(chat.id);
+                    }}
+                    className="agent-history-delete"
+                    aria-label="删除对话"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="agent-sidebar-footer">
             <button
@@ -354,10 +459,7 @@ export function AgentChat() {
                 { icon: Settings, label: '设置' },
                 { icon: HelpCircle, label: '帮助' },
               ].map((item) => (
-                <button
-                  key={item.label}
-                  className="agent-sidebar-tool"
-                >
+                <button key={item.label} className="agent-sidebar-tool">
                   <span className="agent-sidebar-tool-icon">
                     <item.icon className="h-3 w-3" />
                   </span>
@@ -372,20 +474,13 @@ export function AgentChat() {
           <div className="agent-left-gutter" />
           <div className="agent-right-gutter" />
 
-          <div
-            ref={scrollRef}
-            className="agent-scroll"
-          >
+          <div ref={scrollRef} className="agent-scroll">
             <div className="agent-content">
               {!started ? (
                 <div className="flex flex-1 flex-col">
                   <section className="agent-hero">
-                    <h1 className="agent-title">
-                      你好，我是你的摄影老师 AI。
-                    </h1>
-                    <p className="agent-subtitle">
-                      今天我该如何协助你提升视觉叙事能力？
-                    </p>
+                    <h1 className="agent-title">你好，我是你的摄影老师 AI。</h1>
+                    <p className="agent-subtitle">今天我该如何协助你提升视觉叙事能力？</p>
                   </section>
 
                   <section className="agent-quick-grid">
@@ -419,7 +514,10 @@ export function AgentChat() {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={cn('agent-message-row message-fade', message.sender === 'user' && 'agent-message-row-user')}
+                      className={cn(
+                        'agent-message-row message-fade',
+                        message.sender === 'user' && 'agent-message-row-user',
+                      )}
                     >
                       {message.sender === 'agent' && (
                         <div className="agent-message-avatar">
@@ -430,7 +528,9 @@ export function AgentChat() {
                       <div
                         className={cn(
                           'agent-message-bubble',
-                          message.sender === 'user' ? 'agent-message-bubble-user' : 'agent-message-bubble-ai',
+                          message.sender === 'user'
+                            ? 'agent-message-bubble-user'
+                            : 'agent-message-bubble-ai',
                         )}
                       >
                         {message.sender === 'agent' ? (
@@ -443,6 +543,12 @@ export function AgentChat() {
                           message.content
                         )}
                       </div>
+
+                      {message.timestamp && (
+                        <span className="agent-message-time">
+                          {formatTime(message.timestamp)}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

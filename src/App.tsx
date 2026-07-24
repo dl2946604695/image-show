@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet, useLocation, useNavigation } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Gallery } from '@/pages/Gallery';
 import { Upload } from '@/pages/Upload';
 import { Login } from '@/pages/Login';
@@ -34,10 +35,13 @@ function ScrollRestoreHandler() {
 }
 
 function AppContent() {
+  const location = useLocation();
+  const isAgentPage = location.pathname === '/agent';
+
   return (
     <div className="min-h-screen bg-bg">
-      <Navigation />
-      <ScrollRestoreHandler />
+      {!isAgentPage && <Navigation />}
+      {!isAgentPage && <ScrollRestoreHandler />}
       <Outlet />
     </div>
   );
@@ -65,7 +69,12 @@ function App() {
         { path: '/', element: <Gallery /> },
         { path: '/upload', element: <Upload /> },
         { path: '/login', element: <Login /> },
-        { path: '/agent', element: <AgentChat /> },
+        {
+          element: <ProtectedRoute />,
+          children: [
+            { path: '/agent', element: <AgentChat /> },
+          ],
+        },
       ],
     },
   ]);

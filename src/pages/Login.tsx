@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Camera, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, signup } = useAuthStore();
   
   const [isLogin, setIsLogin] = useState(true);
@@ -26,7 +27,8 @@ export function Login() {
       } else {
         await signup(email, password, name);
       }
-      navigate(-1);
+      const from = location.state?.from?.pathname || '/agent';
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message || '操作失败');
     } finally {

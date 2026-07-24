@@ -58,3 +58,19 @@ export interface AuthState {
   logout: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
 }
+
+export interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'agent';
+  timestamp: string;
+}
+
+export interface ChatHistory {
+  id: string;
+  userId: string;
+  messages: ChatMessage[];
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}

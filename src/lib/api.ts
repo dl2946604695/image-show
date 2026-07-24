@@ -359,3 +359,29 @@ export async function checkAuth() {
   setAuthToken(null);
   return null;
 }
+
+export async function getChatHistory() {
+  return request<{ id: string; userId: string; messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[]; title: string; createdAt: string; updatedAt: string }[]>('/chat', {
+    method: 'GET',
+  });
+}
+
+export async function createChat(messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[], title?: string) {
+  return request<{ id: string; userId: string; messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[]; title: string; createdAt: string; updatedAt: string }>('/chat', {
+    method: 'POST',
+    body: JSON.stringify({ messages, title }),
+  });
+}
+
+export async function updateChat(chatId: string, messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[]) {
+  return request<{ id: string; userId: string; messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[]; title: string; createdAt: string; updatedAt: string }>(`/chat/${chatId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ messages }),
+  });
+}
+
+export async function deleteChat(chatId: string) {
+  return request<{}>(`/chat/${chatId}`, {
+    method: 'DELETE',
+  });
+}
