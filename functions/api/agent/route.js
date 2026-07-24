@@ -14,7 +14,7 @@ const SSE_HEADERS = {
 };
 
 const ZHIPU_CHAT_COMPLETIONS_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-const DEFAULT_ZHIPU_MODEL = 'glm-4.7-flash';
+const DEFAULT_ZHIPU_MODEL = 'glm-4.7';
 const DEFAULT_ZHIPU_FALLBACK_MODELS = ['glm-4.5-flash'];
 const DEFAULT_TEMPERATURE = 0.8;
 const DEFAULT_MAX_TOKENS = 4096;
