@@ -13,99 +13,27 @@ const SSE_HEADERS = {
   ...CORS,
 };
 
-const DEFAULT_WEGENT_MODEL = 'Trae#摄影老师';
-const DEFAULT_WEGENT_TOOL_TYPE = 'wegent_chat_bot';
+const ZHIPU_CHAT_COMPLETIONS_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+const DEFAULT_ZHIPU_MODEL = 'glm-4.7-flash';
+const DEFAULT_TEMPERATURE = 0.8;
 
-const mockResponses = [
-  {
-    keywords: ['你好', '您好', 'hello'],
-    text: '你好！我是摄影老师 AI。你可以告诉我拍摄题材、光线条件、器材和想解决的问题，我会尽量给你具体可执行的建议。',
-  },
-  {
-    keywords: ['构图', '三分法', '引导线'],
-    text: '构图可以先从三件事入手：\n\n1. 明确主体，让画面中最重要的信息一眼可见。\n2. 使用三分法或中心构图稳定画面重心。\n3. 利用道路、栏杆、光影边界等引导线，把视线带向主体。\n\n如果你在拍街头或人像，可以先找一个干净背景，再等待人物进入合适位置。',
-  },
-  {
-    keywords: ['光线', '光影', '曝光'],
-    text: '光线决定照片的情绪。清晨和傍晚的低角度光适合制造层次；阴天适合拍柔和人像；强烈正午光更适合寻找硬阴影、几何线条和高反差画面。曝光上建议先保住高光，再通过后期抬起暗部。',
-  },
-  {
-    keywords: ['长曝光', '慢门', '车轨'],
-    text: '长曝光的核心是稳定和控制光量。建议使用三脚架、低 ISO、小光圈，并根据环境加 ND 镜。拍流水可以从 1/4s 到 2s 试起；拍车轨通常从 5s 到 20s 之间微调。',
-  },
-  {
-    keywords: ['街头', '抓拍'],
-    text: '街头摄影先观察光线、背景和人流方向，再等待决定性瞬间。可以预先构好画面，让人物走进画面；也可以用区域对焦减少错失瞬间。注意尊重被摄者隐私和公共空间规则。',
-  },
-  {
-    keywords: ['后期', '调色', 'Lightroom', 'Photoshop'],
-    text: '后期建议按顺序处理：先校正曝光和白平衡，再调整对比度与曲线，之后做色彩统一，最后局部锐化和降噪。不要一开始就套重滤镜，否则容易丢掉照片本身的光线逻辑。',
-  },
-];
+const PHOTOGRAPHY_TEACHER_PROMPT = `你是“摄影老师 Agent”，一位耐心、专业、实战导向的中文摄影老师。
 
-const defaultResponse = `我可以从构图、光线、曝光、器材和后期几个角度帮你分析。
+你的能力范围包括：
+- 摄影基础：曝光三要素、测光、对焦、景深、白平衡、焦段、快门、ISO、光圈。
+- 构图与审美：三分法、中心构图、引导线、框架构图、留白、节奏、层次、视觉重心。
+- 光线与场景：自然光、闪光灯、逆光、侧光、硬光、柔光、夜景、室内、街头、人像、风光、静物、建筑、纪实。
+- 器材建议：相机、镜头、滤镜、三脚架、灯光附件、手机摄影，不做过度消费导向。
+- 后期流程：选片、裁切、曝光校正、色彩统一、曲线、局部调整、降噪、锐化、Lightroom/Photoshop 思路。
+- 作品点评：从主题、构图、光线、色彩、情绪、技术完成度、改进练习给出建设性反馈。
 
-为了给你更具体的建议，你可以补充：
-
-1. 拍摄题材，比如人像、街头、风景或静物。
-2. 当前光线条件，比如室内、阴天、夜景或逆光。
-3. 你想解决的问题，比如画面杂乱、主体不突出、颜色不好看。`;
-
-function normalizeMessages(messages) {
-  if (!Array.isArray(messages)) return [];
-
-  return messages
-    .filter((item) => item && typeof item.content === 'string' && item.content.trim())
-    .slice(-8)
-    .map((item) => ({
-      role: item.role === 'assistant' ? 'assistant' : 'user',
-      content: item.content.trim().slice(0, 1200),
-    }));
-}
-
-function isShortFollowUp(message) {
-  return /^(什么|啥|对|对的|嗯|好|继续|展开|然后呢|怎么做|可以|行|ok)$/i.test(String(message || '').trim());
-}
-
-function pickMockResponse(message, messages = []) {
-  const normalized = String(message || '').toLowerCase();
-  const history = normalizeMessages(messages);
-  const previousUserMessage = [...history]
-    .reverse()
-    .find((item) => item.role === 'user' && item.content !== message)?.content;
-
-  if (isShortFollowUp(message) && previousUserMessage) {
-    return `接着你刚才的问题“${previousUserMessage}”，我建议先把它拆成一个可执行的小练习：
-
-1. 先选一个明确主体，不要同时拍太多信息。
-2. 观察主体旁边有没有线条、明暗边界或色块，可以把视线引过去。
-3. 连续拍 3 张：一张近景、一张中景、一张留出环境的远景，然后比较哪张主体最清楚。
-
-如果你愿意，可以继续告诉我具体拍摄场景，我就按这个场景给你更细的拍摄方案。`;
-  }
-
-  return mockResponses.find((item) =>
-    item.keywords.some((keyword) => normalized.includes(keyword.toLowerCase())),
-  )?.text || defaultResponse;
-}
-
-function buildAgentInput(message, messages = []) {
-  const history = normalizeMessages(messages);
-  if (!history.length) return message;
-
-  const transcript = history
-    .map((item) => `${item.role === 'assistant' ? '摄影老师' : '用户'}：${item.content}`)
-    .join('\n');
-
-  return `你是“光影集”的摄影老师 AI。请根据上下文继续对话，不要重复上一轮已经说过的内容。
-如果用户只回复“对的”“什么”“继续”“展开”等短句，要结合上一轮上下文继续解释或追问。
-回答必须优先围绕摄影创作、构图、光线、曝光、器材、后期或作品点评。
-
-最近对话：
-${transcript}
-
-请回复用户最后一句：${message}`;
-}
+回答规则：
+1. 优先给出可执行建议，避免空泛形容。
+2. 用户信息不足时，先给一个通用方案，再用 1-3 个问题追问关键条件。
+3. 涉及参数时给范围和调整逻辑，例如“先从 1/250s、f/2.8、ISO 400 试起”。
+4. 对初学者解释术语，对进阶用户可以更技术化。
+5. 不编造不存在的相机规格或软件功能；不确定时说明需要核对。
+6. 回答保持中文，结构清晰，适合直接照着练习。`;
 
 function cleanEnvValue(value) {
   const trimmed = String(value || '').trim();
@@ -120,60 +48,67 @@ function cleanEnvValue(value) {
   return trimmed;
 }
 
-function getResponsesUrl(rawUrl) {
-  const url = cleanEnvValue(rawUrl).replace(/\/+$/, '');
-  if (!url) return '';
-  return url.endsWith('/responses') ? url : `${url}/responses`;
+function normalizeMessages(messages) {
+  if (!Array.isArray(messages)) return [];
+
+  return messages
+    .filter((item) => item && typeof item.content === 'string' && item.content.trim())
+    .slice(-10)
+    .map((item) => ({
+      role: item.role === 'assistant' ? 'assistant' : 'user',
+      content: item.content.trim().slice(0, 2000),
+    }));
 }
 
-function errorDetail(error) {
-  if (!(error instanceof Error)) return String(error);
+function buildZhipuMessages(message, messages = []) {
+  const history = normalizeMessages(messages).filter((item) => item.content !== message);
 
-  const cause = error.cause;
-  if (cause && typeof cause === 'object') {
-    const code = 'code' in cause ? cause.code : '';
-    const message = 'message' in cause ? cause.message : '';
-    return [error.message, code, message].filter(Boolean).join(' | ');
-  }
+  return [
+    { role: 'system', content: PHOTOGRAPHY_TEACHER_PROMPT },
+    ...history,
+    { role: 'user', content: message.trim().slice(0, 4000) },
+  ];
+}
 
-  return error.message;
+function sseChunk(content) {
+  return `data: ${JSON.stringify({ content })}\n\n`;
 }
 
 function mockStream(text) {
   const encoder = new TextEncoder();
+
   return new ReadableStream({
     async start(controller) {
       const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       let index = 0;
 
-      await delay(250);
+      await delay(120);
       while (index < text.length) {
-        const chunk = text.slice(index, index + Math.min(8, text.length - index));
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk })}\n\n`));
+        const chunk = text.slice(index, index + Math.min(12, text.length - index));
+        controller.enqueue(encoder.encode(sseChunk(chunk)));
         index += chunk.length;
-        await delay(35);
+        await delay(20);
       }
+
       controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       controller.close();
     },
   });
 }
 
-function fallbackResponse(message, reason, detail = '', messages = []) {
-  const safeDetail = detail ? String(detail).slice(0, 180).replace(/[\r\n]+/g, ' ') : '';
+function fallbackResponse(reason, detail = '') {
+  const safeDetail = detail ? String(detail).slice(0, 240).replace(/[\r\n]+/g, ' ') : '';
   const text =
     reason === 'missing_api_key'
-      ? '智能体 API Key 未配置，当前无法进行真实 AI 对话。请在 Cloudflare Pages 的环境变量中配置 WEGENT_API_KEY。'
-      : reason === 'missing_base_url'
-        ? '智能体接口地址未配置，当前无法进行真实 AI 对话。请在 Cloudflare Pages 的环境变量中配置 WEGENT_BASE_URL。'
-        : `真实智能体调用失败，当前没有返回 AI 回复。错误原因：${reason}${safeDetail ? `（${safeDetail}）` : ''}`;
+      ? '智谱 API Key 还没有配置，所以摄影老师 Agent 暂时不能连接真实模型。请在 Cloudflare Pages 环境变量中设置 ZHIPU_API_KEY。'
+      : reason === 'missing_message'
+        ? '请先输入一个摄影相关问题，例如“阴天怎么拍人像更通透？”或“50mm 镜头适合拍什么？”。'
+        : `摄影老师 Agent 调用智谱模型失败。错误原因：${reason}${safeDetail ? `，${safeDetail}` : ''}`;
 
   return new Response(mockStream(text), {
     headers: {
       ...SSE_HEADERS,
       'X-Agent-Mode': 'error',
-      'X-Agent-Env-Cleaning': 'enabled',
-      'X-Agent-Auth-Mode': 'x-api-key,bearer',
       'X-Agent-Fallback-Reason': reason,
       ...(safeDetail ? { 'X-Agent-Fallback-Detail': safeDetail } : {}),
     },
@@ -183,55 +118,34 @@ function fallbackResponse(message, reason, detail = '', messages = []) {
 function extractDelta(event) {
   if (!event || typeof event !== 'object') return '';
 
-  if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') {
-    return event.delta;
+  const choice = event.choices?.[0];
+  const content = choice?.delta?.content ?? choice?.message?.content;
+
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => (typeof item === 'string' ? item : item?.text || item?.content || ''))
+      .join('');
   }
-
-  if (typeof event.delta === 'string') return event.delta;
-  if (typeof event.content === 'string') return event.content;
-  if (typeof event.output_text === 'string') return event.output_text;
-  if (typeof event.text === 'string') return event.text;
-
-  const choiceContent = event.choices?.[0]?.delta?.content || event.choices?.[0]?.message?.content;
-  if (typeof choiceContent === 'string') return choiceContent;
-
-  const nestedDelta = extractDelta(event.data);
-  if (nestedDelta) return nestedDelta;
 
   return '';
 }
 
-function extractWegentText(payload) {
+function extractMessageText(payload) {
   if (!payload || typeof payload !== 'object') return '';
 
-  if (typeof payload.output_text === 'string') return payload.output_text;
-  if (typeof payload.text === 'string') return payload.text;
-
-  const parts = [];
-  const output = Array.isArray(payload.output) ? payload.output : [];
-
-  for (const item of output) {
-    const content = Array.isArray(item?.content) ? item.content : [];
-
-    for (const block of content) {
-      if (typeof block?.text === 'string') {
-        parts.push(block.text);
-      } else if (typeof block?.output_text === 'string') {
-        parts.push(block.output_text);
-      } else if (typeof block?.content === 'string') {
-        parts.push(block.content);
-      }
-    }
+  const content = payload.choices?.[0]?.message?.content;
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => (typeof item === 'string' ? item : item?.text || item?.content || ''))
+      .join('');
   }
 
-  const choiceContent =
-    payload.choices?.[0]?.message?.content || payload.choices?.[0]?.delta?.content;
-  if (!parts.length && typeof choiceContent === 'string') return choiceContent;
-
-  return parts.join('\n\n').trim();
+  return '';
 }
 
-async function streamWegentResponse(response) {
+async function streamZhipuResponse(response) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder('utf-8');
   const reader = response.body?.getReader();
@@ -245,23 +159,23 @@ async function streamWegentResponse(response) {
       let buffer = '';
       let emitted = false;
 
+      const emit = (content) => {
+        if (!content) return;
+        emitted = true;
+        controller.enqueue(encoder.encode(sseChunk(content)));
+      };
+
       const processLine = (line) => {
         const trimmed = line.trim();
-        if (!trimmed) return;
+        if (!trimmed || !trimmed.startsWith('data:')) return;
 
-        const payload = trimmed.startsWith('data:') ? trimmed.slice(5).trim() : trimmed;
+        const payload = trimmed.slice(5).trim();
         if (!payload || payload === '[DONE]') return;
 
         try {
-          const event = JSON.parse(payload);
-          const delta = extractDelta(event);
-          if (delta) {
-            emitted = true;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: delta })}\n\n`));
-          }
+          emit(extractDelta(JSON.parse(payload)));
         } catch {
-          emitted = true;
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: payload })}\n\n`));
+          emit(payload);
         }
       };
 
@@ -280,7 +194,7 @@ async function streamWegentResponse(response) {
       if (!emitted) {
         controller.enqueue(
           encoder.encode(
-            `data: ${JSON.stringify({ content: '已连接到智能体，但本次没有收到可显示的文本内容。请检查智能体输出事件格式。' })}\n\n`,
+            sseChunk('已经连接到智谱模型，但本次没有收到可显示的文本内容。请稍后重试，或检查模型响应格式。'),
           ),
         );
       }
@@ -294,6 +208,22 @@ async function streamWegentResponse(response) {
   });
 }
 
+async function errorDetail(response) {
+  try {
+    return await response.text();
+  } catch {
+    return response.statusText;
+  }
+}
+
+function getApiKey(env = {}) {
+  return (
+    cleanEnvValue(env.ZHIPU_API_KEY) ||
+    cleanEnvValue(env.BIGMODEL_API_KEY) ||
+    cleanEnvValue(env.GLM_API_KEY)
+  );
+}
+
 export async function onRequest(context) {
   if (context.request.method === 'OPTIONS') return corsPreflight();
   if (context.request.method !== 'POST') {
@@ -303,87 +233,69 @@ export async function onRequest(context) {
     });
   }
 
-  let message = '';
-  let messages = [];
-
   try {
     const body = await context.request.json();
-    message = body.message;
-    messages = normalizeMessages(body.messages);
+    const message = typeof body.message === 'string' ? body.message.trim() : '';
 
-    if (!message || typeof message !== 'string') {
-      return new Response(JSON.stringify({ success: false, error: 'Message is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
-      });
+    if (!message) {
+      return fallbackResponse('missing_message');
     }
 
-    const apiKey = cleanEnvValue(context.env.WEGENT_API_KEY);
+    const apiKey = getApiKey(context.env);
     if (!apiKey) {
-      return fallbackResponse(message, 'missing_api_key', '', messages);
+      return fallbackResponse('missing_api_key');
     }
 
-    const responsesUrl = getResponsesUrl(context.env.WEGENT_BASE_URL || context.env.WEGENT_RESPONSES_URL);
-    if (!responsesUrl) {
-      return fallbackResponse(message, 'missing_base_url', '', messages);
-    }
+    const model = cleanEnvValue(context.env.ZHIPU_MODEL) || DEFAULT_ZHIPU_MODEL;
+    const temperature =
+      Number.parseFloat(cleanEnvValue(context.env.ZHIPU_TEMPERATURE)) || DEFAULT_TEMPERATURE;
 
-    const model = cleanEnvValue(context.env.WEGENT_MODEL) || DEFAULT_WEGENT_MODEL;
-    const toolType = cleanEnvValue(context.env.WEGENT_TOOL_TYPE) || DEFAULT_WEGENT_TOOL_TYPE;
-    const agentInput = buildAgentInput(message, messages);
-
-    const response = await fetch(responsesUrl, {
+    const upstream = await fetch(ZHIPU_CHAT_COMPLETIONS_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'X-API-Key': apiKey,
         Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json; charset=utf-8',
       },
       body: JSON.stringify({
         model,
-        input: agentInput,
-        stream: false,
-        tools: toolType ? [{ type: toolType }] : undefined,
+        messages: buildZhipuMessages(message, body.messages),
+        temperature,
+        stream: true,
       }),
     });
 
-    if (!response.ok) {
-      let detail = '';
-      try {
-        detail = await response.text();
-      } catch {
-        detail = response.statusText;
-      }
-      return fallbackResponse(message, `upstream_${response.status}`, detail, messages);
+    if (!upstream.ok) {
+      return fallbackResponse(`upstream_${upstream.status}`, await errorDetail(upstream));
     }
 
-    let payload;
-    try {
-      payload = await response.json();
-    } catch {
-      return fallbackResponse(message, 'upstream_invalid_json', 'Wegent returned non-JSON response', messages);
+    const contentType = upstream.headers.get('content-type') || '';
+    if (contentType.includes('text/event-stream')) {
+      return new Response(await streamZhipuResponse(upstream), {
+        headers: {
+          ...SSE_HEADERS,
+          'X-Agent-Mode': 'zhipu',
+          'X-Agent-Model': model,
+          'X-Agent-Upstream-Stream': 'true',
+        },
+      });
     }
 
-    const text = extractWegentText(payload);
+    const payload = await upstream.json();
+    const text = extractMessageText(payload);
     if (!text) {
-      return fallbackResponse(
-        message,
-        'upstream_empty_text',
-        JSON.stringify(payload).slice(0, 300),
-        messages,
-      );
+      return fallbackResponse('upstream_empty_text', JSON.stringify(payload).slice(0, 400));
     }
 
     return new Response(mockStream(text), {
       headers: {
         ...SSE_HEADERS,
-        'X-Agent-Mode': 'wegent',
-        'X-Agent-Env-Cleaning': 'enabled',
-        'X-Agent-Auth-Mode': 'x-api-key,bearer',
+        'X-Agent-Mode': 'zhipu',
+        'X-Agent-Model': model,
         'X-Agent-Upstream-Stream': 'false',
       },
     });
   } catch (error) {
-    return fallbackResponse(message, 'exception', errorDetail(error), messages);
+    const detail = error instanceof Error ? error.message : String(error);
+    return fallbackResponse('exception', detail);
   }
 }
