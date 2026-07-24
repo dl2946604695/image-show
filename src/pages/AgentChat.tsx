@@ -169,6 +169,8 @@ function TypingDots() {
   );
 }
 
+const STORAGE_KEY = 'agent_chat_history';
+
 export function AgentChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -194,17 +196,38 @@ export function AgentChat() {
     loadChatHistory();
   }, []);
 
+  const saveToLocalStorage = (history: ChatHistoryType[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    } catch {
+    }
+  };
+
+  const loadFromLocalStorage = (): ChatHistoryType[] => {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) {
+        return JSON.parse(data);
+      }
+    } catch {
+    }
+    return [];
+  };
+
   const loadChatHistory = async () => {
     setLoadingHistory(true);
     try {
-      const result = await getChatHistory();
-      if (result.success) {
-        setChatHistory(result.data);
-      } else {
-        console.error('加载聊天历史失败:', result.error);
+      const localHistory = loadFromLocalStorage();
+      if (localHistory.length > 0) {
+        setChatHistory(localHistory);
       }
-    } catch (error) {
-      console.error('加载聊天历史异常:', error);
+
+      const result = await getChatHistory();
+      if (result.success && result.data.length > 0) {
+        setChatHistory(result.data);
+        saveToLocalStorage(result.data);
+      }
+    } catch {
     } finally {
       setLoadingHistory(false);
     }
@@ -244,28 +267,39 @@ export function AgentChat() {
     try {
       if (currentChatId) {
         const result = await updateChat(currentChatId, newMessages);
-        if (!result.success) {
-          console.error('更新聊天失败:', result.error);
+        if (result.success) {
+          setChatHistory((prev) => {
+            const updated = prev.map((chat) =>
+              chat.id === currentChatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
+            );
+            saveToLocalStorage(updated);
+            return updated;
+          });
         }
       } else {
         const title = newMessages[0]?.content?.slice(0, 30) || '新对话';
         const result = await createChat(newMessages, title);
         if (result.success) {
           setCurrentChatId(result.data.id);
-          setChatHistory((prev) => [result.data, ...prev]);
-        } else {
-          console.error('创建聊天失败:', result.error);
+          setChatHistory((prev) => {
+            const updated = [result.data, ...prev];
+            saveToLocalStorage(updated);
+            return updated;
+          });
         }
       }
-    } catch (error) {
-      console.error('保存聊天异常:', error);
+    } catch {
     }
   }, [currentChatId]);
 
   const deleteChatById = useCallback(async (chatId: string) => {
     try {
       await deleteChat(chatId);
-      setChatHistory((prev) => prev.filter((c) => c.id !== chatId));
+      setChatHistory((prev) => {
+        const updated = prev.filter((c) => c.id !== chatId);
+        saveToLocalStorage(updated);
+        return updated;
+      });
       if (currentChatId === chatId) {
         startNewChat();
       }
@@ -317,11 +351,24 @@ export function AgentChat() {
           const result = await createChat([userMessage], title);
           if (result.success) {
             setCurrentChatId(result.data.id);
-            setChatHistory((prev) => [result.data, ...prev]);
+            setChatHistory((prev) => {
+              const newHistory = [result.data, ...prev];
+              saveToLocalStorage(newHistory);
+              return newHistory;
+            });
           }
         } else {
           const updateMessages = [...messages, userMessage];
-          await updateChat(currentChatId, updateMessages);
+          const updateResult = await updateChat(currentChatId, updateMessages);
+          if (updateResult.success) {
+            setChatHistory((prev) => {
+              const updated = prev.map((chat) =>
+                chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
+              );
+              saveToLocalStorage(updated);
+              return updated;
+            });
+          }
         }
 
         const response = await fetch(`${API_BASE_URL}/agent`, {

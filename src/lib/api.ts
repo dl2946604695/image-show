@@ -180,10 +180,12 @@ async function request<T>(
   }
 
   try {
+    console.log(`API请求: ${API_BASE_URL}${endpoint}`, { token: !!token, method: options.method });
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
     });
+    console.log(`API响应: ${response.status}`, { url: `${API_BASE_URL}${endpoint}` });
 
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
@@ -191,13 +193,15 @@ async function request<T>(
     }
 
     const result = await response.json();
+    console.log(`API结果:`, result);
 
     if (!response.ok) {
       return { success: false, data: result as T, error: result.error || '请求失败' };
     }
 
     return result;
-  } catch {
+  } catch (error) {
+    console.error(`API错误:`, error);
     return { success: false, data: {} as T, error: '网络错误' };
   }
 }
