@@ -154,15 +154,18 @@ function Markdown({ text }: { text: string }) {
 
 function TypingDots() {
   return (
-    <span className="flex gap-1.5 py-2">
-      {['0ms', '150ms', '300ms'].map((delay) => (
-        <span
-          key={delay}
-          className="h-2 w-2 animate-bounce rounded-full bg-[#00d4ff]"
-          style={{ animationDelay: delay }}
-        />
-      ))}
-    </span>
+    <div className="flex flex-col items-start gap-2 py-2">
+      <span className="text-[#a0a0a0] text-sm">AI正在思考中，请稍候...</span>
+      <span className="flex gap-1.5">
+        {['0ms', '150ms', '300ms'].map((delay) => (
+          <span
+            key={delay}
+            className="h-2 w-2 animate-bounce rounded-full bg-[#00d4ff]"
+            style={{ animationDelay: delay }}
+          />
+        ))}
+      </span>
+    </div>
   );
 }
 
@@ -197,8 +200,11 @@ export function AgentChat() {
       const result = await getChatHistory();
       if (result.success) {
         setChatHistory(result.data);
+      } else {
+        console.error('加载聊天历史失败:', result.error);
       }
-    } catch {
+    } catch (error) {
+      console.error('加载聊天历史异常:', error);
     } finally {
       setLoadingHistory(false);
     }
@@ -237,16 +243,22 @@ export function AgentChat() {
 
     try {
       if (currentChatId) {
-        await updateChat(currentChatId, newMessages);
+        const result = await updateChat(currentChatId, newMessages);
+        if (!result.success) {
+          console.error('更新聊天失败:', result.error);
+        }
       } else {
         const title = newMessages[0]?.content?.slice(0, 30) || '新对话';
         const result = await createChat(newMessages, title);
         if (result.success) {
           setCurrentChatId(result.data.id);
           setChatHistory((prev) => [result.data, ...prev]);
+        } else {
+          console.error('创建聊天失败:', result.error);
         }
       }
-    } catch {
+    } catch (error) {
+      console.error('保存聊天异常:', error);
     }
   }, [currentChatId]);
 
@@ -297,7 +309,21 @@ export function AgentChat() {
       const controller = new AbortController();
       abortRef.current = controller;
 
+      let agentContent = '';
+
       try {
+        if (!currentChatId) {
+          const title = content.slice(0, 30) || '新对话';
+          const result = await createChat([userMessage], title);
+          if (result.success) {
+            setCurrentChatId(result.data.id);
+            setChatHistory((prev) => [result.data, ...prev]);
+          }
+        } else {
+          const updateMessages = [...messages, userMessage];
+          await updateChat(currentChatId, updateMessages);
+        }
+
         const response = await fetch(`${API_BASE_URL}/agent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -330,6 +356,7 @@ export function AgentChat() {
             try {
               const parsed = JSON.parse(data);
               if (parsed.content) {
+                agentContent += parsed.content;
                 setMessages((prev) =>
                   prev.map((message) =>
                     message.id === agentId
@@ -344,34 +371,39 @@ export function AgentChat() {
           }
         }
 
-        
+        const finalMessages: Message[] = [
+          ...messages,
+          userMessage,
+          { id: agentId, content: agentContent, sender: 'agent' as const, timestamp: new Date().toISOString() },
+        ];
+        await saveMessages(finalMessages);
       } catch (error: unknown) {
         if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          const errorContent = '抱歉，我暂时无法回答你的问题。你可以稍后再试，或先描述拍摄场景、光线条件和想解决的摄影问题。';
           setMessages((prev) =>
             prev.map((message) =>
               message.id === agentId && message.content === ''
                 ? {
                     ...message,
-                    content:
-                      '抱歉，我暂时无法回答你的问题。你可以稍后再试，或先描述拍摄场景、光线条件和想解决的摄影问题。',
+                    content: errorContent,
                   }
                 : message,
             ),
           );
+          const finalMessages: Message[] = [
+            ...messages,
+            userMessage,
+            { id: agentId, content: errorContent, sender: 'agent' as const, timestamp: new Date().toISOString() },
+          ];
+          await saveMessages(finalMessages);
         }
       } finally {
         setLoading(false);
         abortRef.current = null;
       }
     },
-    [input, loading, messages, saveMessages],
+    [input, loading, messages, saveMessages, currentChatId],
   );
-
-  useEffect(() => {
-    if (!loading && messages.length > 0) {
-      saveMessages(messages);
-    }
-  }, [messages, loading, saveMessages]);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
