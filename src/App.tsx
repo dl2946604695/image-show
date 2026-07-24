@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet, useLocation, useNavigation } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -35,20 +35,35 @@ function ScrollRestoreHandler() {
 }
 
 function AppContent() {
-  const location = useLocation();
-  const isAgentPage = location.pathname === '/agent';
-
   return (
     <div className="min-h-screen bg-bg">
-      {!isAgentPage && <Navigation />}
-      {!isAgentPage && <ScrollRestoreHandler />}
+      <Navigation />
+      <ScrollRestoreHandler />
       <Outlet />
     </div>
   );
 }
 
+const router = createBrowserRouter([
+  {
+    element: <AppContent />,
+    children: [
+      { path: '/', element: <Gallery /> },
+      { path: '/upload', element: <Upload /> },
+      { path: '/login', element: <Login /> },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: '/agent', element: <AgentChat /> },
+        ],
+      },
+    ],
+  },
+]);
+
 function App() {
-  const { initAuth, loading: authLoading } = useAuthStore();
+  const authLoading = useAuthStore((s) => s.loading);
+  const initAuth = useAuthStore((s) => s.initAuth);
 
   useEffect(() => {
     initAuth();
@@ -61,23 +76,6 @@ function App() {
       </div>
     );
   }
-
-  const router = createBrowserRouter([
-    {
-      element: <AppContent />,
-      children: [
-        { path: '/', element: <Gallery /> },
-        { path: '/upload', element: <Upload /> },
-        { path: '/login', element: <Login /> },
-        {
-          element: <ProtectedRoute />,
-          children: [
-            { path: '/agent', element: <AgentChat /> },
-          ],
-        },
-      ],
-    },
-  ]);
 
   return <RouterProvider router={router} />;
 }

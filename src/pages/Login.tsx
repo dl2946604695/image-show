@@ -27,8 +27,12 @@ export function Login() {
       } else {
         await signup(email, password, name);
       }
-      const from = location.state?.from?.pathname || '/agent';
-      navigate(from, { replace: true });
+      const fromPath = location.state?.from?.pathname;
+      if (fromPath) {
+        navigate(fromPath, { replace: true });
+      } else {
+        navigate(-1);
+      }
     } catch (err: any) {
       setError(err.message || '操作失败');
     } finally {
