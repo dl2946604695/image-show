@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet, useLocation, useNavigation } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -6,6 +6,7 @@ import { Gallery } from '@/pages/Gallery';
 import { Upload } from '@/pages/Upload';
 import { Login } from '@/pages/Login';
 import { AgentChat } from '@/pages/AgentChat';
+import { Profile } from '@/pages/Profile';
 import { useAuthStore } from '@/store/authStore';
 import { usePhotoStore } from '@/store/photoStore';
 
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: '/agent', element: <AgentChat /> },
+          { path: '/profile', element: <Profile /> },
         ],
       },
     ],

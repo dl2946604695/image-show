@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+﻿export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 let token: string | null = localStorage.getItem('auth_token');
 
@@ -259,6 +259,18 @@ export async function getPhotos(category?: string) {
   }
   
   return { success: true, data: filtered };
+}
+
+export async function getUserPhotos() {
+  try {
+    const result = await request<{ id: string; title: string; description: string; url: string; thumbnailUrl: string; category: string; photographerId: string; photographerName: string; createdAt: string; likes: number }[]>('/photos/user');
+    if (result.success) {
+      return result;
+    }
+  } catch {
+  }
+  
+  return { success: false, data: [] as any, error: '获取用户作品失败' };
 }
 
 export async function getPhoto(id: string) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Bot,
@@ -46,6 +46,7 @@ export function Navigation() {
     { icon: Star, label: '精选', path: '/', pending: true },
     { icon: Users, label: '摄影师', path: '/', pending: true },
     { icon: Bot, label: '摄影老师', path: '/agent' },
+    { icon: User, label: '我的主页', path: '/profile' },
   ];
   const isAgentPage = location.pathname === '/agent';
 
@@ -70,9 +71,9 @@ export function Navigation() {
           <div className="hidden lg:flex nav-links">
             {navItems.map((item) => {
               const active =
-                item.path === '/agent'
-                  ? location.pathname === '/agent'
-                  : location.pathname === '/' && item.label === '探索';
+                item.path === '/'
+                  ? location.pathname === '/' && item.label === '探索'
+                  : location.pathname === item.path;
 
               return (
                 <button
@@ -124,9 +125,9 @@ export function Navigation() {
               <div className="nav-drawer-links">
                 {navItems.map((item) => {
                   const active =
-                    item.path === '/agent'
-                      ? location.pathname === '/agent'
-                      : location.pathname === '/' && item.label === '探索';
+                    item.path === '/'
+                      ? location.pathname === '/' && item.label === '探索'
+                      : location.pathname === item.path;
 
                   return (
                     <button
