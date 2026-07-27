@@ -1016,8 +1016,7 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
   transition: all var(--transition-fast);
   margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
+  display: block;
 }
 
 .upload-drop-zone:hover {

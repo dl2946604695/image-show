@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload as UploadIcon, X, ImagePlus } from 'lucide-react';
 import { uploadPhoto, getCategories } from '@/lib/api';
@@ -10,7 +10,7 @@ export function Upload() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const { categories, setCategories } = usePhotoStore();
-  
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -68,9 +68,26 @@ export function Upload() {
     }
   };
 
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    const selectedFile = e.dataTransfer.files?.[0];
+    if (selectedFile) {
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        setError('文件大小不能超过 10MB');
+        return;
+      }
+      if (!selectedFile.type.startsWith('image/')) {
+        setError('请上传图片文件');
+        return;
+      }
+      setFile(selectedFile);
+      setError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title || !file || !category) {
       setError('请填写完整信息');
       return;
@@ -121,7 +138,11 @@ export function Upload() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="upload-drop-zone">
+          <label
+            className="upload-drop-zone"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+          >
             {preview ? (
               <div className="relative inline-block">
                 <img
@@ -131,14 +152,14 @@ export function Upload() {
                 />
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFile(null); }}
                   className="absolute -top-2 -right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full transition-colors"
                 >
                   <X className="w-4 h-4 text-white" />
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 pointer-events-none">
                 <div className="w-12 h-12 mx-auto bg-bg-tertiary rounded-xl flex items-center justify-center">
                   <ImagePlus className="w-6 h-6 text-text-tertiary" />
                 </div>
@@ -152,9 +173,9 @@ export function Upload() {
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              className="sr-only"
             />
-          </div>
+          </label>
 
           <input
             type="text"
