@@ -171,10 +171,14 @@ function TypingDots() {
 
 const STORAGE_KEY = 'agent_chat_history';
 
+interface ChatState {
+  messages: Message[];
+  loading: boolean;
+}
+
 export function AgentChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatStates, setChatStates] = useState<Map<string, ChatState>>(new Map());
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -182,7 +186,16 @@ export function AgentChat() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const abortRefs = useRef<Map<string, AbortController>>(new Map());
+  const chatStatesRef = useRef<Map<string, ChatState>>(chatStates);
+
+  useEffect(() => {
+    chatStatesRef.current = chatStates;
+  }, [chatStates]);
+
+  const currentState = currentChatId ? chatStates.get(currentChatId) : null;
+  const messages = currentState?.messages || [];
+  const loading = currentState?.loading || false;
 
   useEffect(() => {
     document.title = '摄影老师 AI | 光影集';
@@ -222,13 +235,28 @@ export function AgentChat() {
       const result = await getChatHistory();
       if (result.success && result.data.length > 0) {
         setChatHistory(result.data);
+        const states = new Map<string, ChatState>();
+        result.data.forEach((chat) => {
+          states.set(chat.id, { messages: chat.messages, loading: false });
+        });
+        setChatStates(states);
       } else if (hasLocalData) {
         setChatHistory(localHistory);
+        const states = new Map<string, ChatState>();
+        localHistory.forEach((chat) => {
+          states.set(chat.id, { messages: chat.messages, loading: false });
+        });
+        setChatStates(states);
       }
     } catch {
       const localHistory = loadFromLocalStorage();
       if (localHistory.length > 0) {
         setChatHistory(localHistory);
+        const states = new Map<string, ChatState>();
+        localHistory.forEach((chat) => {
+          states.set(chat.id, { messages: chat.messages, loading: false });
+        });
+        setChatStates(states);
       }
     } finally {
       setLoadingHistory(false);
@@ -242,72 +270,73 @@ export function AgentChat() {
   };
 
   const loadChat = useCallback((chat: ChatHistoryType) => {
-    setMessages(chat.messages);
+    const state = chatStates.get(chat.id);
+    if (!state) {
+      setChatStates((prev) => {
+        const newStates = new Map(prev);
+        newStates.set(chat.id, { messages: chat.messages, loading: false });
+        return newStates;
+      });
+    }
     setCurrentChatId(chat.id);
     setStarted(true);
     setInput('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
-  }, []);
+  }, [chatStates]);
 
   const startNewChat = useCallback(() => {
-    abortRef.current?.abort();
-    setMessages([]);
     setCurrentChatId(null);
     setStarted(false);
-    setLoading(false);
     setInput('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
   }, []);
 
-  const saveMessages = useCallback(async (newMessages: Message[]) => {
+  const saveMessages = useCallback(async (newMessages: Message[], chatId: string) => {
     if (newMessages.length === 0) return;
 
     try {
-      if (currentChatId) {
-        await updateChat(currentChatId, newMessages);
-        setChatHistory((prev) =>
-          prev.map((chat) =>
-            chat.id === currentChatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
-          )
-        );
-      } else {
-        const title = newMessages[0]?.content?.slice(0, 30) || '新对话';
-        const newChat: ChatHistoryType = {
-          id: crypto.randomUUID(),
-          userId: '',
-          messages: newMessages,
-          title,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        const result = await createChat(newMessages, title);
-        if (result.success) {
-          setCurrentChatId(result.data.id);
-          setChatHistory((prev) => [result.data, ...prev]);
-        } else {
-          setCurrentChatId(newChat.id);
-          setChatHistory((prev) => [newChat, ...prev]);
-        }
-      }
+      await updateChat(chatId, newMessages);
+      setChatHistory((prev) =>
+        prev.map((chat) =>
+          chat.id === chatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
+        )
+      );
+      setChatStates((prev) => {
+        const newStates = new Map(prev);
+        newStates.set(chatId, { messages: newMessages, loading: false });
+        return newStates;
+      });
     } catch {
-      if (currentChatId) {
-        setChatHistory((prev) =>
-          prev.map((chat) =>
-            chat.id === currentChatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
-          )
-        );
-      }
+      setChatHistory((prev) =>
+        prev.map((chat) =>
+          chat.id === chatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
+        )
+      );
+      setChatStates((prev) => {
+        const newStates = new Map(prev);
+        newStates.set(chatId, { messages: newMessages, loading: false });
+        return newStates;
+      });
     }
-  }, [currentChatId]);
+  }, []);
 
   const deleteChatById = useCallback(async (chatId: string) => {
     try {
+      const abortController = abortRefs.current.get(chatId);
+      abortController?.abort();
+      abortRefs.current.delete(chatId);
+      
       await deleteChat(chatId);
       setChatHistory((prev) => prev.filter((c) => c.id !== chatId));
+      setChatStates((prev) => {
+        const newStates = new Map(prev);
+        newStates.delete(chatId);
+        return newStates;
+      });
       if (currentChatId === chatId) {
         startNewChat();
       }
@@ -318,7 +347,12 @@ export function AgentChat() {
   const send = useCallback(
     async (text?: string) => {
       const content = (text ?? input).trim();
-      if (!content || loading) return;
+      if (!content) return;
+
+      const chatId = currentChatId || crypto.randomUUID();
+
+      const currentChatState = chatStatesRef.current.get(chatId);
+      if (currentChatState?.loading) return;
 
       setStarted(true);
       setInput('');
@@ -332,7 +366,9 @@ export function AgentChat() {
         sender: 'user',
         timestamp: new Date().toISOString(),
       };
-      const contextMessages = [...messages, userMessage]
+
+      const currentChatMessages = currentChatState?.messages || [];
+      const contextMessages = [...currentChatMessages, userMessage]
         .filter((message) => message.content.trim())
         .slice(-8)
         .map((message) => ({
@@ -341,55 +377,50 @@ export function AgentChat() {
         }));
       const agentId = crypto.randomUUID();
       const newMessages: Message[] = [
-        ...messages,
+        ...currentChatMessages,
         userMessage,
         { id: agentId, content: '', sender: 'agent' as const, timestamp: new Date().toISOString() },
       ];
-      setMessages(newMessages);
-      setLoading(true);
+
+      setChatStates((prev) => {
+        const newStates = new Map(prev);
+        newStates.set(chatId, { messages: newMessages, loading: true });
+        return newStates;
+      });
+
+      if (!currentChatId) {
+        setCurrentChatId(chatId);
+        const title = content.slice(0, 30) || '新对话';
+        const newChat: ChatHistoryType = {
+          id: chatId,
+          userId: '',
+          messages: [userMessage],
+          title,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        const result = await createChat([userMessage], title);
+        if (result.success) {
+          setChatHistory((prev) => [result.data, ...prev]);
+        } else {
+          setChatHistory((prev) => [newChat, ...prev]);
+        }
+      } else {
+        const updateMessages = [...currentChatMessages, userMessage];
+        await updateChat(currentChatId, updateMessages);
+        setChatHistory((prev) =>
+          prev.map((chat) =>
+            chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
+          )
+        );
+      }
 
       const controller = new AbortController();
-      abortRef.current = controller;
+      abortRefs.current.set(chatId, controller);
 
       let agentContent = '';
 
       try {
-        if (!currentChatId) {
-          const title = content.slice(0, 30) || '新对话';
-          const newChat: ChatHistoryType = {
-            id: crypto.randomUUID(),
-            userId: '',
-            messages: [userMessage],
-            title,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          const result = await createChat([userMessage], title);
-          if (result.success) {
-            setCurrentChatId(result.data.id);
-            setChatHistory((prev) => [result.data, ...prev]);
-          } else {
-            setCurrentChatId(newChat.id);
-            setChatHistory((prev) => [newChat, ...prev]);
-          }
-        } else {
-          const updateMessages = [...messages, userMessage];
-          const updateResult = await updateChat(currentChatId, updateMessages);
-          if (updateResult.success) {
-            setChatHistory((prev) =>
-              prev.map((chat) =>
-                chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
-              )
-            );
-          } else {
-            setChatHistory((prev) =>
-              prev.map((chat) =>
-                chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
-              )
-            );
-          }
-        }
-
         const response = await fetch(`${API_BASE_URL}/agent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -423,13 +454,21 @@ export function AgentChat() {
               const parsed = JSON.parse(data);
               if (parsed.content) {
                 agentContent += parsed.content;
-                setMessages((prev) =>
-                  prev.map((message) =>
-                    message.id === agentId
-                      ? { ...message, content: message.content + parsed.content }
-                      : message,
-                  ),
-                );
+                setChatStates((prev) => {
+                  const newStates = new Map(prev);
+                  const state = newStates.get(chatId);
+                  if (state) {
+                    newStates.set(chatId, {
+                      ...state,
+                      messages: state.messages.map((message) =>
+                        message.id === agentId
+                          ? { ...message, content: message.content + parsed.content }
+                          : message,
+                      ),
+                    });
+                  }
+                  return newStates;
+                });
               }
             } catch {
               continue;
@@ -438,37 +477,41 @@ export function AgentChat() {
         }
 
         const finalMessages: Message[] = [
-          ...messages,
+          ...currentChatMessages,
           userMessage,
           { id: agentId, content: agentContent, sender: 'agent' as const, timestamp: new Date().toISOString() },
         ];
-        await saveMessages(finalMessages);
+        await saveMessages(finalMessages, chatId);
       } catch (error: unknown) {
         if (!(error instanceof DOMException && error.name === 'AbortError')) {
           const errorContent = '抱歉，我暂时无法回答你的问题。你可以稍后再试，或先描述拍摄场景、光线条件和想解决的摄影问题。';
-          setMessages((prev) =>
-            prev.map((message) =>
-              message.id === agentId && message.content === ''
-                ? {
-                    ...message,
-                    content: errorContent,
-                  }
-                : message,
-            ),
-          );
+          setChatStates((prev) => {
+            const newStates = new Map(prev);
+            const state = newStates.get(chatId);
+            if (state) {
+              newStates.set(chatId, {
+                ...state,
+                messages: state.messages.map((message) =>
+                  message.id === agentId && message.content === ''
+                    ? { ...message, content: errorContent }
+                    : message,
+                ),
+              });
+            }
+            return newStates;
+          });
           const finalMessages: Message[] = [
-            ...messages,
+            ...currentChatMessages,
             userMessage,
             { id: agentId, content: errorContent, sender: 'agent' as const, timestamp: new Date().toISOString() },
           ];
-          await saveMessages(finalMessages);
+          await saveMessages(finalMessages, chatId);
         }
       } finally {
-        setLoading(false);
-        abortRef.current = null;
+        abortRefs.current.delete(chatId);
       }
     },
-    [input, loading, messages, saveMessages, currentChatId],
+    [input, messages, saveMessages, currentChatId],
   );
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -498,10 +541,9 @@ export function AgentChat() {
       <div className="agent-shell">
         <aside className="agent-sidebar">
           <div>
-            <h2 className="font-['Noto_Serif_SC'] text-[18px] font-semibold text-[#e5e2e1]">
-              历史记录
+            <h2 className="font-['Noto_Serif_SC'] text-[14px] font-semibold text-[#e5e2e1]">
+              历史
             </h2>
-            <p className="mt-1 text-[10px] text-[#687174]">最近的对话</p>
           </div>
 
           {loadingHistory ? (
@@ -546,10 +588,10 @@ export function AgentChat() {
           <div className="agent-sidebar-footer">
             <button
               onClick={startNewChat}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-[9px] bg-[#00d4ff] text-[14px] font-bold text-[#001f24] shadow-[0_0_22px_rgba(0,212,255,0.16)] transition hover:brightness-105"
+              className="flex h-9 w-full items-center justify-center rounded-[8px] bg-[#00d4ff] text-[#001f24] shadow-[0_0_16px_rgba(0,212,255,0.16)] transition hover:brightness-105"
+              aria-label="开启新对话"
             >
               <Plus className="h-4 w-4" />
-              开启新对话
             </button>
 
             <div className="agent-sidebar-tools">
@@ -557,11 +599,10 @@ export function AgentChat() {
                 { icon: Settings, label: '设置' },
                 { icon: HelpCircle, label: '帮助' },
               ].map((item) => (
-                <button key={item.label} className="agent-sidebar-tool">
+                <button key={item.label} className="agent-sidebar-tool" aria-label={item.label}>
                   <span className="agent-sidebar-tool-icon">
                     <item.icon className="h-3 w-3" />
                   </span>
-                  <span>{item.label}</span>
                 </button>
               ))}
             </div>
@@ -682,7 +723,7 @@ export function AgentChat() {
 
                   <button
                     type="button"
-                    onClick={() => (loading ? abortRef.current?.abort() : send())}
+                    onClick={() => (loading ? abortRefs.current.get(currentChatId!)?.abort() : send())}
                     disabled={!loading && !input.trim()}
                     aria-label={loading ? '停止生成' : '发送问题'}
                     className={cn(
