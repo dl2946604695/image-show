@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Aperture,
   ArrowUp,
@@ -554,7 +554,7 @@ export function AgentChat() {
           ) : (
             <div className="agent-history-list">
               {chatHistory.map((chat) => (
-                <button
+                <div
                   key={chat.id}
                   onClick={() => loadChat(chat)}
                   className={cn(
@@ -570,7 +570,7 @@ export function AgentChat() {
                   >
                     <LayoutGrid className="h-3.5 w-3.5" />
                   </span>
-                  <span className="truncate">{chat.title}</span>
+                  <span className="agent-history-title">{chat.title}</span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -579,9 +579,9 @@ export function AgentChat() {
                     className="agent-history-delete"
                     aria-label="删除对话"
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-2.5 w-2.5" />
                   </button>
-                </button>
+                </div>
               ))}
             </div>
           )}

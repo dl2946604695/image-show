@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -1704,7 +1704,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 40px;
   align-items: center;
   gap: 10px;
-  padding: 0 8px;
+  padding: 0 6px;
   border: 0;
   border-radius: 6px;
   background: transparent;
@@ -1719,16 +1719,35 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
 }
 
-.agent-history-delete {
-  display: none;
-  padding: 4px;
-  border-radius: 4px;
-  background: rgba(239, 68, 68, 0.8);
-  color: white;
+
+.agent-history-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.agent-history-button:hover .agent-history-delete {
+.agent-history-delete {
+  flex: 0 0 auto;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin-left: 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #6b7374;
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.agent-history-delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
 }
 
 .agent-history-button:hover,
