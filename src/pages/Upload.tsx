@@ -143,12 +143,12 @@ export function Upload() {
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
           >
-            {preview ? (
-              <div className="relative inline-block">
+           {preview ? (
+              <div className="relative inline-block max-w-full">
                 <img
                   src={preview}
                   alt="预览"
-                  className="max-h-32 rounded-lg object-contain"
+                  className="max-h-48 max-w-full rounded-lg object-contain"
                 />
                 <button
                   type="button"
