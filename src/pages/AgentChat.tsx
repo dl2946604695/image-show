@@ -446,6 +446,35 @@ export function AgentChat() {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+        let flushScheduled = false;
+        let lastFlushedContent = '';
+
+        const flushToState = () => {
+          flushScheduled = false;
+          if (agentContent === lastFlushedContent) return;
+          lastFlushedContent = agentContent;
+          const snapshot = agentContent;
+          setChatStates((prev) => {
+            const newStates = new Map(prev);
+            const state = newStates.get(chatId);
+            if (!state) return prev;
+            newStates.set(chatId, {
+              ...state,
+              messages: state.messages.map((message) =>
+                message.id === agentId
+                  ? { ...message, content: snapshot }
+                  : message,
+              ),
+            });
+            return newStates;
+          });
+        };
+
+        const scheduleFlush = () => {
+          if (flushScheduled) return;
+          flushScheduled = true;
+          requestAnimationFrame(flushToState);
+        };
 
         while (true) {
           const { done, value } = await reader.read();
@@ -465,27 +494,16 @@ export function AgentChat() {
               const parsed = JSON.parse(data);
               if (parsed.content) {
                 agentContent += parsed.content;
-                setChatStates((prev) => {
-                  const newStates = new Map(prev);
-                  const state = newStates.get(chatId);
-                  if (state) {
-                    newStates.set(chatId, {
-                      ...state,
-                      messages: state.messages.map((message) =>
-                        message.id === agentId
-                          ? { ...message, content: message.content + parsed.content }
-                          : message,
-                      ),
-                    });
-                  }
-                  return newStates;
-                });
+                scheduleFlush();
               }
             } catch {
               continue;
             }
           }
         }
+
+        // 流结束后确保最终内容已渲染
+        flushToState();
 
         const finalMessages: Message[] = [
           ...currentChatMessages,
