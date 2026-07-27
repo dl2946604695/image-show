@@ -154,19 +154,23 @@ function Markdown({ text }: { text: string }) {
 
 function TypingDots() {
   return (
-    <div className="flex flex-col items-start gap-2 py-2">
-      <span className="text-[#a0a0a0] text-sm">AI正在思考中，请稍候...</span>
-      <span className="flex gap-1.5">
-        {['0ms', '150ms', '300ms'].map((delay) => (
-          <span
-            key={delay}
-            className="h-2 w-2 animate-bounce rounded-full bg-[#00d4ff]"
-            style={{ animationDelay: delay }}
-          />
+    <div className="agent-typing">
+      <span className="agent-typing-text">
+        AI正在思考中
+        <span className="agent-typing-ellipsis">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </span>
+      </span>
+      <span className="agent-typing-dots">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="agent-typing-dot" style={{ animationDelay: `${i * 160}ms` }} />
         ))}
       </span>
     </div>
   );
+}
 }
 
 const STORAGE_KEY = 'agent_chat_history';
@@ -399,20 +403,28 @@ export function AgentChat() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        const result = await createChat([userMessage], title);
-        if (result.success) {
-          setChatHistory((prev) => [result.data, ...prev]);
-        } else {
-          setChatHistory((prev) => [newChat, ...prev]);
-        }
+        // 后台持久化，不阻塞 AI 请求
+        createChat([userMessage], title)
+          .then((result) => {
+            if (result.success) {
+              setChatHistory((prev) => [result.data, ...prev]);
+            } else {
+              setChatHistory((prev) => [newChat, ...prev]);
+            }
+          })
+          .catch(() => setChatHistory((prev) => [newChat, ...prev]));
       } else {
         const updateMessages = [...currentChatMessages, userMessage];
-        await updateChat(currentChatId, updateMessages);
-        setChatHistory((prev) =>
-          prev.map((chat) =>
-            chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
-          )
-        );
+        // 后台持久化，不阻塞 AI 请求
+        updateChat(currentChatId, updateMessages)
+          .then(() => {
+            setChatHistory((prev) =>
+              prev.map((chat) =>
+                chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
+              )
+            );
+          })
+          .catch(() => undefined);
       }
 
       const controller = new AbortController();
