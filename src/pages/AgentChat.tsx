@@ -217,15 +217,19 @@ export function AgentChat() {
     setLoadingHistory(true);
     try {
       const localHistory = loadFromLocalStorage();
-      if (localHistory.length > 0) {
-        setChatHistory(localHistory);
-      }
+      const hasLocalData = localHistory.length > 0;
 
       const result = await getChatHistory();
       if (result.success && result.data.length > 0) {
         setChatHistory(result.data);
+      } else if (hasLocalData) {
+        setChatHistory(localHistory);
       }
     } catch {
+      const localHistory = loadFromLocalStorage();
+      if (localHistory.length > 0) {
+        setChatHistory(localHistory);
+      }
     } finally {
       setLoadingHistory(false);
     }
@@ -264,23 +268,39 @@ export function AgentChat() {
 
     try {
       if (currentChatId) {
-        const result = await updateChat(currentChatId, newMessages);
-        if (result.success) {
-          setChatHistory((prev) =>
-            prev.map((chat) =>
-              chat.id === currentChatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
-            )
-          );
-        }
+        await updateChat(currentChatId, newMessages);
+        setChatHistory((prev) =>
+          prev.map((chat) =>
+            chat.id === currentChatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
+          )
+        );
       } else {
         const title = newMessages[0]?.content?.slice(0, 30) || '新对话';
+        const newChat: ChatHistoryType = {
+          id: crypto.randomUUID(),
+          userId: '',
+          messages: newMessages,
+          title,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
         const result = await createChat(newMessages, title);
         if (result.success) {
           setCurrentChatId(result.data.id);
           setChatHistory((prev) => [result.data, ...prev]);
+        } else {
+          setCurrentChatId(newChat.id);
+          setChatHistory((prev) => [newChat, ...prev]);
         }
       }
     } catch {
+      if (currentChatId) {
+        setChatHistory((prev) =>
+          prev.map((chat) =>
+            chat.id === currentChatId ? { ...chat, messages: newMessages, updatedAt: new Date().toISOString() } : chat
+          )
+        );
+      }
     }
   }, [currentChatId]);
 
@@ -336,15 +356,32 @@ export function AgentChat() {
       try {
         if (!currentChatId) {
           const title = content.slice(0, 30) || '新对话';
+          const newChat: ChatHistoryType = {
+            id: crypto.randomUUID(),
+            userId: '',
+            messages: [userMessage],
+            title,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
           const result = await createChat([userMessage], title);
           if (result.success) {
             setCurrentChatId(result.data.id);
             setChatHistory((prev) => [result.data, ...prev]);
+          } else {
+            setCurrentChatId(newChat.id);
+            setChatHistory((prev) => [newChat, ...prev]);
           }
         } else {
           const updateMessages = [...messages, userMessage];
           const updateResult = await updateChat(currentChatId, updateMessages);
           if (updateResult.success) {
+            setChatHistory((prev) =>
+              prev.map((chat) =>
+                chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
+              )
+            );
+          } else {
             setChatHistory((prev) =>
               prev.map((chat) =>
                 chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
