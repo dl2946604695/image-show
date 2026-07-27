@@ -542,8 +542,9 @@ export function AgentChat() {
         <aside className="agent-sidebar">
           <div>
             <h2 className="font-['Noto_Serif_SC'] text-[14px] font-semibold text-[#e5e2e1]">
-              历史
+              历史记录
             </h2>
+            <p className="mt-1 text-[10px] text-[#687174]">最近的对话</p>
           </div>
 
           {loadingHistory ? (
@@ -588,10 +589,10 @@ export function AgentChat() {
           <div className="agent-sidebar-footer">
             <button
               onClick={startNewChat}
-              className="flex h-9 w-full items-center justify-center rounded-[8px] bg-[#00d4ff] text-[#001f24] shadow-[0_0_16px_rgba(0,212,255,0.16)] transition hover:brightness-105"
-              aria-label="开启新对话"
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-[8px] bg-[#00d4ff] text-[12px] font-bold text-[#001f24] shadow-[0_0_16px_rgba(0,212,255,0.16)] transition hover:brightness-105"
             >
               <Plus className="h-4 w-4" />
+              新对话
             </button>
 
             <div className="agent-sidebar-tools">
@@ -599,10 +600,11 @@ export function AgentChat() {
                 { icon: Settings, label: '设置' },
                 { icon: HelpCircle, label: '帮助' },
               ].map((item) => (
-                <button key={item.label} className="agent-sidebar-tool" aria-label={item.label}>
+                <button key={item.label} className="agent-sidebar-tool">
                   <span className="agent-sidebar-tool-icon">
                     <item.icon className="h-3 w-3" />
                   </span>
+                  <span>{item.label}</span>
                 </button>
               ))}
             </div>
