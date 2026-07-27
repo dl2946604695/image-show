@@ -5,8 +5,9 @@ const KEYS = {
   users: 'app:users',
   photos: 'app:photos',
   categories: 'app:categories',
-  chatHistory: 'app:chat_history',
-  posts: 'app:posts',
+ chatHistory: 'app:chat_history',
+ posts: 'app:posts',
+};
 
 export async function getJSON(kv, key, fallback) {
   if (!kv) return fallback;
