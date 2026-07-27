@@ -2046,6 +2046,80 @@ h1, h2, h3, h4, h5, h6 {
   text-align: left;
 }
 
+
+.agent-typing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.agent-typing-text {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 13px;
+  color: #8a9499;
+  animation: agent-typing-fade 1.6s ease-in-out infinite;
+}
+
+.agent-typing-ellipsis {
+  display: inline-flex;
+  overflow: hidden;
+  width: 14px;
+  margin-left: 2px;
+}
+
+.agent-typing-ellipsis span {
+  opacity: 0;
+  animation: agent-typing-dot-text 1.4s steps(1, end) infinite;
+}
+
+.agent-typing-ellipsis span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.agent-typing-ellipsis span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.agent-typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.agent-typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00d4ff;
+  opacity: 0.4;
+  transform: translateY(0);
+  animation: agent-typing-wave 1.2s ease-in-out infinite;
+}
+
+@keyframes agent-typing-wave {
+  0%, 60%, 100% {
+    opacity: 0.35;
+    transform: translateY(0) scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1);
+  }
+}
+
+@keyframes agent-typing-fade {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes agent-typing-dot-text {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
 .agent-input-area {
   position: absolute;
   right: 0;

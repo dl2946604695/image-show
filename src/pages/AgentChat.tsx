@@ -171,7 +171,6 @@ function TypingDots() {
     </div>
   );
 }
-}
 
 const STORAGE_KEY = 'agent_chat_history';
 
