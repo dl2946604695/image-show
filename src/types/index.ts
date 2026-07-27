@@ -74,3 +74,32 @@ export interface ChatHistory {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Photographer {
+  id: string;
+  name: string;
+  photoCount: number;
+  totalLikes: number;
+  coverPhoto: Photo | null;
+}
+
+export interface PhotographerProfile {
+  user: { id: string; name: string; email: string; createdAt: string } | null;
+  photos: Photo[];
+  stats: { count: number; totalLikes: number; categories: number };
+}
+
+export type PostType = 'share' | 'gear' | 'talk' | 'tutorial';
+
+export interface Post {
+  id: string;
+  type: PostType;
+  title: string;
+  summary: string;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+  likes: number;
+  replies: number;
+  cover: string;
+}

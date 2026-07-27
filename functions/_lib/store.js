@@ -1,4 +1,4 @@
-// Cloudflare KV 存储辅助 + 初始种子数据
+﻿// Cloudflare KV 存储辅助 + 初始种子数据
 import { hashPassword } from './auth.js';
 
 const KEYS = {
@@ -6,7 +6,7 @@ const KEYS = {
   photos: 'app:photos',
   categories: 'app:categories',
   chatHistory: 'app:chat_history',
-};
+  posts: 'app:posts',
 
 export async function getJSON(kv, key, fallback) {
   if (!kv) return fallback;
@@ -31,6 +31,9 @@ export const getCategories = (kv) => getJSON(kv, KEYS.categories, []);
 export const setCategories = (kv, v) => setJSON(kv, KEYS.categories, v);
 export const getChatHistory = (kv) => getJSON(kv, KEYS.chatHistory, []);
 export const setChatHistory = (kv, v) => setJSON(kv, KEYS.chatHistory, v);
+
+export const getPosts = (kv) => getJSON(kv, KEYS.posts, []);
+export const setPosts = (kv, v) => setJSON(kv, KEYS.posts, v);
 
 const SEED_CATEGORIES = [
   { id: '1', name: '风景', icon: 'mountain' },
@@ -74,6 +77,18 @@ export async function ensureSeed(kv) {
         password: hashed,
         createdAt: new Date().toISOString(),
       },
+    ]);
+  }
+  if ((await getPosts(kv)).length === 0) {
+    await setPosts(kv, [
+      { id: 'p1', type: 'share', title: '黄山的云海日出', summary: '凌晨四点爬山等到的光线，金色打在云层上的瞬间值得所有等待。', authorId: '1', authorName: '张三', createdAt: '2024-01-15T08:00:00Z', likes: 86, replies: 12, cover: 'https://picsum.photos/id/1015/800/500' },
+      { id: 'p2', type: 'gear', title: '入手适马 35mm f/1.4 一周使用感受', summary: '锐度表现优秀，暗光环境下对焦也很果断，人像和静物都适用。', authorId: '2', authorName: '李四', createdAt: '2024-01-14T10:30:00Z', likes: 64, replies: 8, cover: 'https://picsum.photos/id/1067/800/500' },
+      { id: 'p3', type: 'talk', title: '新手第一台相机怎么选？预算一万以内', summary: '纠结于二手全画幅和新半画幅，主要拍人像和日常，求大佬指点。', authorId: '5', authorName: '陈七', createdAt: '2024-01-13T14:00:00Z', likes: 42, replies: 23, cover: 'https://picsum.photos/id/106/800/500' },
+      { id: 'p4', type: 'tutorial', title: '十分钟搞懂曝光三角：光圈、快门、ISO', summary: '用最直白的方式讲清楚三者关系，附实战参数对照表。', authorId: '3', authorName: '王五', createdAt: '2024-01-12T09:00:00Z', likes: 158, replies: 31, cover: 'https://picsum.photos/id/1033/800/500' },
+      { id: 'p5', type: 'share', title: '城市夜景长曝光实战', summary: '三脚架 + 低 ISO + f/8，车流光轨和建筑灯光的平衡心得。', authorId: '1', authorName: '张三', createdAt: '2024-01-11T19:00:00Z', likes: 73, replies: 15, cover: 'https://picsum.photos/id/1015/800/500' },
+      { id: 'p6', type: 'gear', title: '为什么我最终卖掉了 24-70 换成定焦', summary: '变焦的便利 vs 定焦的画质和体积，一年使用后的取舍思考。', authorId: '4', authorName: '赵六', createdAt: '2024-01-10T11:00:00Z', likes: 55, replies: 19, cover: 'https://picsum.photos/id/40/800/500' },
+      { id: 'p7', type: 'tutorial', title: 'Lightroom 人像调色入门：从青橙色调开始', summary: 'HSL 面板拆解 + 实操步骤，让你的城市人像更有电影感。', authorId: '3', authorName: '王五', createdAt: '2024-01-09T16:00:00Z', likes: 112, replies: 27, cover: 'https://picsum.photos/id/1005/800/500' },
+      { id: 'p8', type: 'talk', title: '大家平时后期用 PS 还是 LR 多？', summary: '聊聊各自的工作流，我觉得 LR 适合批量调色，PS 适合精修。', authorId: '5', authorName: '陈七', createdAt: '2024-01-08T13:00:00Z', likes: 38, replies: 41, cover: 'https://picsum.photos/id/1006/800/500' },
     ]);
   }
 }

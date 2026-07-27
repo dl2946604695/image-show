@@ -273,6 +273,39 @@ export async function getUserPhotos() {
   return { success: false, data: [] as any, error: '获取用户作品失败' };
 }
 
+export async function getTopPhotographers() {
+  try {
+    const result = await request<{ id: string; name: string; photoCount: number; totalLikes: number; coverPhoto: any }[]>('/photographers/top');
+    if (result.success) {
+      return result;
+    }
+  } catch {
+  }
+  return { success: false, data: [] as any, error: '获取名人堂数据失败' };
+}
+
+export async function getPhotographer(userId: string) {
+  try {
+    const result = await request<{ user: { id: string; name: string; email: string; createdAt: string } | null; photos: any[]; stats: { count: number; totalLikes: number; categories: number } }>(`/photographers/${userId}`);
+    if (result.success) {
+      return result;
+    }
+  } catch {
+  }
+  return { success: false, data: {} as any, error: '获取摄影师信息失败' };
+}
+
+export async function getPosts(type?: string) {
+  try {
+    const params = type ? `?type=${encodeURIComponent(type)}` : '';
+    const result = await request<{ id: string; type: string; title: string; summary: string; authorId: string; authorName: string; createdAt: string; likes: number; replies: number; cover: string }[]>('/posts' + params);
+    if (result.success) {
+      return result;
+    }
+  } catch {
+  }
+  return { success: false, data: [] as any, error: '获取社区内容失败' };
+}
 export async function getPhoto(id: string) {
   try {
     const result = await request<{ id: string; title: string; description: string; url: string; thumbnailUrl: string; category: string; photographerId: string; photographerName: string; createdAt: string; likes: number }>(`/photos/${id}`);

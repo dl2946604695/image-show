@@ -7,6 +7,7 @@ import { Upload } from '@/pages/Upload';
 import { Login } from '@/pages/Login';
 import { AgentChat } from '@/pages/AgentChat';
 import { Profile } from '@/pages/Profile';
+import { Curated } from '@/pages/Curated';
 import { useAuthStore } from '@/store/authStore';
 import { usePhotoStore } from '@/store/photoStore';
 
@@ -50,6 +51,7 @@ const router = createBrowserRouter([
     element: <AppContent />,
     children: [
       { path: '/', element: <Gallery /> },
+      { path: '/curated', element: <Curated /> },
       { path: '/upload', element: <Upload /> },
       { path: '/login', element: <Login /> },
       {
@@ -57,6 +59,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/agent', element: <AgentChat /> },
           { path: '/profile', element: <Profile /> },
+          { path: '/profile/:userId', element: <Profile /> },
         ],
       },
     ],

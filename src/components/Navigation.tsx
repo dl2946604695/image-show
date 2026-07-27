@@ -43,10 +43,9 @@ export function Navigation() {
 
   const navItems = [
     { icon: Image, label: '探索', path: '/' },
-    { icon: Star, label: '精选', path: '/', pending: true },
-    { icon: Users, label: '摄影师', path: '/', pending: true },
+    { icon: Star, label: '精选', path: '/curated' },
+    { icon: Users, label: '摄影师', path: '/profile' },
     { icon: Bot, label: '摄影老师', path: '/agent' },
-    { icon: User, label: '我的主页', path: '/profile' },
   ];
   const isAgentPage = location.pathname === '/agent';
 
@@ -80,7 +79,7 @@ export function Navigation() {
                   key={item.label}
                   onClick={() => go(item.path)}
                   className={`nav-link ${active ? 'nav-link-active' : ''}`}
-                  title={item.pending ? '即将上线' : undefined}
+                  title={item.label}
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.label}</span>
@@ -134,7 +133,7 @@ export function Navigation() {
                       key={item.label}
                       onClick={() => go(item.path)}
                       className={`nav-drawer-link ${active ? 'nav-drawer-link-active' : ''}`}
-                      title={item.pending ? '即将上线' : undefined}
+                      title={item.label}
                     >
                       <item.icon className="h-5 w-5" />
                       <span>{item.label}</span>
