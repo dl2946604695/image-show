@@ -87,6 +87,16 @@ export function Navigation() {
                 </button>
               );
             })}
+            {user?.id === 'admin' && (
+              <button
+                onClick={() => go('/admin')}
+                className={`nav-link ${location.pathname === "/admin" ? "nav-link-active" : ""}`}
+                title="运营后台"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span>运营后台</span>
+              </button>
+            )}
           </div>
 
           <button className="nav-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label="打开菜单">
