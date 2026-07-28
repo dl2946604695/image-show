@@ -71,8 +71,8 @@ export function Navigation() {
             {navItems.map((item) => {
               const active =
                 item.path === '/'
-                  ? location.pathname === '/' && item.label === '探索'
-                  : location.pathname === item.path;
+                  ? location.pathname === '/'
+                  : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
               return (
                 <button
@@ -125,8 +125,8 @@ export function Navigation() {
                 {navItems.map((item) => {
                   const active =
                     item.path === '/'
-                      ? location.pathname === '/' && item.label === '探索'
-                      : location.pathname === item.path;
+                      ? location.pathname === '/'
+                      : location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
                   return (
                     <button
