@@ -8,6 +8,7 @@ import { Login } from '@/pages/Login';
 import { AgentChat } from '@/pages/AgentChat';
 import { Profile } from '@/pages/Profile';
 import { Curated } from '@/pages/Curated';
+import { Admin } from '@/pages/Admin';
 import { useAuthStore } from '@/store/authStore';
 import { usePhotoStore } from '@/store/photoStore';
 
@@ -66,6 +67,7 @@ const router = createBrowserRouter([
           { path: '/agent', element: <AgentChat /> },
           { path: '/profile', element: <Profile /> },
           { path: '/profile/:userId', element: <Profile /> },
+          { path: '/admin', element: <Admin /> },
         ],
       },
     ],

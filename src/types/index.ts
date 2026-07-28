@@ -103,3 +103,31 @@ export interface Post {
   replies: number;
   cover: string;
 }
+
+export interface AdminStats {
+  users: number;
+  photos: number;
+  posts: number;
+  chats: number;
+  totalLikes: number;
+  topPhotographers: { id: string; name: string; count: number; likes: number }[];
+  uploadsByDay: { date: string; count: number }[];
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  createdAt: string;
+  photoCount: number;
+}
+
+export interface AdminChat {
+  id: string;
+  userId: string;
+  title: string;
+  messageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}

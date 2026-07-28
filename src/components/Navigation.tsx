@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
+  BarChart3,
   Bot,
   Camera,
   ChevronLeft,
@@ -165,6 +166,12 @@ export function Navigation() {
                       <Plus className="h-5 w-5" />
                       <span>上传作品</span>
                     </button>
+                    {user?.id === 'admin' && (
+                      <button onClick={() => go('/admin')} className="nav-drawer-action-btn">
+                        <BarChart3 className="h-5 w-5" />
+                        <span>运营后台</span>
+                      </button>
+                    )}
                     <button onClick={handleLogout} className="nav-drawer-action-btn nav-drawer-action-btn-danger">
                       <LogOut className="h-5 w-5" />
                       <span>退出登录</span>

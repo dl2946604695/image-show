@@ -77,6 +77,7 @@ export async function ensureSeed(kv) {
         name: '管理员',
         password: hashed,
         createdAt: new Date().toISOString(),
+        role: 'admin',
       },
     ]);
   }

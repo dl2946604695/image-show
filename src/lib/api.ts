@@ -1,4 +1,6 @@
-﻿export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+﻿import type { AdminStats, AdminUser, AdminChat, Photo, Post } from '@/types';
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 let token: string | null = localStorage.getItem('auth_token');
 
@@ -433,4 +435,41 @@ export async function deleteChat(chatId: string) {
   return request<{}>(`/chat/${chatId}`, {
     method: 'DELETE',
   });
+}
+
+// ===== 管理员 API =====
+export async function getAdminStats() {
+  return request<AdminStats>('/admin/stats');
+}
+
+export async function getAdminUsers() {
+  return request<AdminUser[]>('/admin/users');
+}
+
+export async function deleteAdminUser(userId: string) {
+  return request<{}>(`/admin/users?userId=${encodeURIComponent(userId)}`, { method: 'DELETE' });
+}
+
+export async function getAdminPhotos() {
+  return request<Photo[]>('/admin/photos');
+}
+
+export async function deleteAdminPhoto(photoId: string) {
+  return request<{}>(`/admin/photos?photoId=${encodeURIComponent(photoId)}`, { method: 'DELETE' });
+}
+
+export async function getAdminPosts() {
+  return request<Post[]>('/admin/posts');
+}
+
+export async function deleteAdminPost(postId: string) {
+  return request<{}>(`/admin/posts?postId=${encodeURIComponent(postId)}`, { method: 'DELETE' });
+}
+
+export async function getAdminChats() {
+  return request<AdminChat[]>('/admin/chats');
+}
+
+export async function deleteAdminChat(chatId: string) {
+  return request<{}>(`/admin/chats?chatId=${encodeURIComponent(chatId)}`, { method: 'DELETE' });
 }
