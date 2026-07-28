@@ -144,16 +144,16 @@ export function Upload() {
             onDrop={handleDrop}
           >
            {preview ? (
-              <div className="relative inline-block max-w-full">
+              <div className="relative block w-full">
                 <img
                   src={preview}
                   alt="预览"
-                  className="max-h-48 max-w-full rounded-lg object-contain"
+                  className="block mx-auto max-h-48 w-auto max-w-full rounded-lg object-contain"
                 />
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFile(null); }}
-                  className="absolute -top-2 -right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full transition-colors"
+                  className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full transition-colors"
                 >
                   <X className="w-4 h-4 text-white" />
                 </button>
