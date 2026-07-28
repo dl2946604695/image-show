@@ -2227,32 +2227,6 @@ h1, h2, h3, h4, h5, h6 {
   color: #737b7d;
 }
 
-.nav-bar-inner.nav-bar-inner-agent {
-  width: 100%;
-  max-width: 1440px;
-}
-
-.nav-bar-inner-agent .nav-links {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  gap: 8px;
-}
-
-.nav-bar-inner-agent .nav-link {
-  height: 34px;
-  min-width: 74px;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(28, 28, 28, 0.92);
-  color: #b9b9b9;
-}
-
-.nav-bar-inner-agent .nav-link-active {
-  border-color: rgba(0, 212, 255, 0.3);
-  background: rgba(0, 212, 255, 0.1);
-  color: var(--color-accent);
-}
 
 @media (max-width: 1023px) {
   .agent-shell {

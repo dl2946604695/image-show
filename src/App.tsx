@@ -33,6 +33,12 @@ function ScrollRestoreHandler() {
     }
   }, [location.pathname, scrollY, navigation.state]);
 
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+
   return null;
 }
 
