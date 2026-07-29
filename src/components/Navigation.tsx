@@ -87,7 +87,7 @@ export function Navigation() {
                 </button>
               );
             })}
-            {user?.id === 'admin' && (
+            {user?.role === 'admin' && (
               <button
                 onClick={() => go('/admin')}
                 className={`nav-link ${location.pathname === "/admin" ? "nav-link-active" : ""}`}
@@ -176,7 +176,7 @@ export function Navigation() {
                       <Plus className="h-5 w-5" />
                       <span>上传作品</span>
                     </button>
-                    {user?.id === 'admin' && (
+                    {user?.role === 'admin' && (
                       <button onClick={() => go('/admin')} className="nav-drawer-action-btn">
                         <BarChart3 className="h-5 w-5" />
                         <span>运营后台</span>

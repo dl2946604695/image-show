@@ -81,6 +81,23 @@ export async function ensureSeed(kv) {
       },
     ]);
   }
+  // 兼容旧数据：给缺少 role 字段的 admin 账号补上管理员角色
+  const existingUsers = await getUsers(kv);
+  let usersDirty = false;
+  for (const u of existingUsers) {
+    if (u.id === 'admin' && !u.role) {
+      u.role = 'admin';
+      usersDirty = true;
+    }
+    if (u.role && !['admin', 'user'].includes(u.role)) {
+      u.role = 'user';
+      usersDirty = true;
+    }
+  }
+  if (usersDirty) {
+    await setUsers(kv, existingUsers);
+  }
+
   if ((await getPosts(kv)).length === 0) {
     await setPosts(kv, [
       { id: 'p1', type: 'share', title: '黄山的云海日出', summary: '凌晨四点爬山等到的光线，金色打在云层上的瞬间值得所有等待。', authorId: '1', authorName: '张三', createdAt: '2024-01-15T08:00:00Z', likes: 86, replies: 12, cover: 'https://picsum.photos/id/1015/800/500' },

@@ -1,4 +1,4 @@
-import { json, corsPreflight, getKV, getSecret } from '../../_lib/cors.js';
+﻿import { json, corsPreflight, getKV, getSecret } from '../../_lib/cors.js';
 import { getUsers, setUsers, ensureSeed } from '../../_lib/store.js';
 import { hashPassword, generateToken } from '../../_lib/auth.js';
 
@@ -27,6 +27,7 @@ export async function onRequest(context) {
     name,
     password: hashed,
     createdAt: new Date().toISOString(),
+    role: 'user',
   };
   users.push(newUser);
   await setUsers(kv, users);
@@ -35,7 +36,7 @@ export async function onRequest(context) {
   return json(201, {
     success: true,
     data: {
-      user: { id: newUser.id, email: newUser.email, name: newUser.name },
+      user: { id: newUser.id, email: newUser.email, name: newUser.name, role: 'user' },
       token,
     },
   });

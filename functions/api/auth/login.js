@@ -1,4 +1,4 @@
-import { json, corsPreflight, getKV, getSecret } from '../../_lib/cors.js';
+﻿import { json, corsPreflight, getKV, getSecret } from '../../_lib/cors.js';
 import { getUsers, ensureSeed } from '../../_lib/store.js';
 import { verifyPassword, generateToken } from '../../_lib/auth.js';
 
@@ -26,7 +26,7 @@ export async function onRequest(context) {
   return json(200, {
     success: true,
     data: {
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, role: user.role || 'user' },
       token,
     },
   });

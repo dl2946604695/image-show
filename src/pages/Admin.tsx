@@ -84,7 +84,7 @@ export function Admin() {
   if (loading) {
     return <div className="min-h-screen bg-bg flex items-center justify-center"><div className="loading-spinner" /></div>;
   }
-  if (!isAuthenticated || user?.id !== 'admin') {
+  if (!isAuthenticated || user?.role !== 'admin') {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center text-text-tertiary">
         需要管理员权限

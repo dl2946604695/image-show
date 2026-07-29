@@ -1,4 +1,4 @@
-export interface Photo {
+﻿export interface Photo {
   id: string;
   title: string;
   description: string;
@@ -22,6 +22,7 @@ export interface User {
   email: string;
   name: string;
   avatarUrl?: string;
+  role?: string;
 }
 
 export interface PhotoState {
