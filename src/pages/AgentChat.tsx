@@ -212,8 +212,13 @@ export function AgentChat() {
   }, [messages, loading]);
 
   useEffect(() => {
+    // 切换账号时重置组件状态，避免上一个账号的残留
+    setChatHistory([]);
+    setChatStates(new Map());
+    setCurrentChatId(null);
+    setStarted(false);
     loadChatHistory();
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     if (storageKey && chatHistory.length > 0) {
