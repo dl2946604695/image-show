@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { API_BASE_URL, getChatHistory, createChat, updateChat, deleteChat } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/authStore';
 import { ChatHistory as ChatHistoryType } from '@/types';
 
 interface Message {
@@ -172,7 +173,7 @@ function TypingDots() {
   );
 }
 
-const STORAGE_KEY = 'agent_chat_history';
+
 
 interface ChatState {
   messages: Message[];
@@ -180,6 +181,8 @@ interface ChatState {
 }
 
 export function AgentChat() {
+  const { user } = useAuthStore();
+  const storageKey = user ? `agent_chat_history_${user.id}` : '';
   const [chatStates, setChatStates] = useState<Map<string, ChatState>>(new Map());
   const [input, setInput] = useState('');
   const [started, setStarted] = useState(false);
@@ -213,16 +216,24 @@ export function AgentChat() {
   }, []);
 
   useEffect(() => {
-    if (chatHistory.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+    if (storageKey && chatHistory.length > 0) {
+      localStorage.setItem(storageKey, JSON.stringify(chatHistory));
     }
-  }, [chatHistory]);
+  }, [chatHistory, storageKey]);
+
+  // 清理旧版本的全局缓存 key，避免跨用户泄漏
+  useEffect(() => {
+    localStorage.removeItem('agent_chat_history');
+  }, []);
 
   const loadFromLocalStorage = (): ChatHistoryType[] => {
+    if (!storageKey) return [];
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
+      const data = localStorage.getItem(storageKey);
       if (data) {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        // 只保留属于当前用户的历史
+        return Array.isArray(parsed) ? parsed.filter((c) => c.userId === user?.id) : [];
       }
     } catch {
     }
