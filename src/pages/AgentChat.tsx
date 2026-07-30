@@ -244,7 +244,6 @@ export function AgentChat() {
     }
     return [];
   };
-
   const loadChatHistory = async () => {
     setLoadingHistory(true);
     try {
@@ -253,12 +252,16 @@ export function AgentChat() {
 
       const result = await getChatHistory();
       if (result.success && result.data.length > 0) {
-        setChatHistory(result.data);
+        const history = result.data;
+        setChatHistory(history);
         const states = new Map<string, ChatState>();
-        result.data.forEach((chat) => {
+        history.forEach((chat) => {
           states.set(chat.id, { messages: chat.messages, loading: false });
         });
         setChatStates(states);
+        const latest = history[0];
+        setCurrentChatId(latest.id);
+        setStarted(true);
       } else if (hasLocalData) {
         setChatHistory(localHistory);
         const states = new Map<string, ChatState>();
@@ -266,6 +269,9 @@ export function AgentChat() {
           states.set(chat.id, { messages: chat.messages, loading: false });
         });
         setChatStates(states);
+        const latest = localHistory[0];
+        setCurrentChatId(latest.id);
+        setStarted(true);
       }
     } catch {
       const localHistory = loadFromLocalStorage();
@@ -276,6 +282,9 @@ export function AgentChat() {
           states.set(chat.id, { messages: chat.messages, loading: false });
         });
         setChatStates(states);
+        const latest = localHistory[0];
+        setCurrentChatId(latest.id);
+        setStarted(true);
       }
     } finally {
       setLoadingHistory(false);
