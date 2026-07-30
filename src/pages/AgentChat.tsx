@@ -418,28 +418,22 @@ export function AgentChat() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        // 后台持久化，不阻塞 AI 请求
-        createChat([userMessage], title)
-          .then((result) => {
-            if (result.success) {
-              setChatHistory((prev) => [result.data, ...prev]);
-            } else {
-              setChatHistory((prev) => [newChat, ...prev]);
-            }
-          })
-          .catch(() => setChatHistory((prev) => [newChat, ...prev]));
+        // 先持久化用户消息，确保切换页面时对话不丢失
+        const result = await createChat([userMessage], title);
+        if (result.success) {
+          setChatHistory((prev) => [result.data, ...prev]);
+        } else {
+          setChatHistory((prev) => [newChat, ...prev]);
+        }
       } else {
         const updateMessages = [...currentChatMessages, userMessage];
-        // 后台持久化，不阻塞 AI 请求
-        updateChat(currentChatId, updateMessages)
-          .then(() => {
-            setChatHistory((prev) =>
-              prev.map((chat) =>
-                chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
-              )
-            );
-          })
-          .catch(() => undefined);
+        // 先持久化用户消息，确保切换页面时对话不丢失
+        await updateChat(currentChatId, updateMessages);
+        setChatHistory((prev) =>
+          prev.map((chat) =>
+            chat.id === currentChatId ? { ...chat, messages: updateMessages, updatedAt: new Date().toISOString() } : chat
+          )
+        );
       }
 
       const controller = new AbortController();
