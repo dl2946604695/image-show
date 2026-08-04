@@ -1,4 +1,4 @@
-import { json, corsPreflight, getKV, getSecret } from '../../_lib/cors.js';
+﻿import { json, corsPreflight, getKV, getSecret } from '../../_lib/cors.js';
 import { getChatHistory, setChatHistory } from '../../_lib/store.js';
 import { verifyToken } from '../../_lib/auth.js';
 
@@ -44,7 +44,7 @@ export async function onRequest(context) {
 
     const allHistory = await getChatHistory(kv);
     const newChat = {
-      id: crypto.randomUUID(),
+      id: body.id || crypto.randomUUID(),
       userId,
       messages,
       title: title || messages[0]?.content?.slice(0, 30) || '新对话',

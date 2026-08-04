@@ -417,10 +417,10 @@ export async function getChatHistory() {
   });
 }
 
-export async function createChat(messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[], title?: string) {
+export async function createChat(messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[], title?: string, chatId?: string) {
   return request<{ id: string; userId: string; messages: { id: string; content: string; sender: 'user' | 'agent'; timestamp: string }[]; title: string; createdAt: string; updatedAt: string }>('/chat', {
     method: 'POST',
-    body: JSON.stringify({ messages, title }),
+    body: JSON.stringify({ messages, title, id: chatId }),
   });
 }
 

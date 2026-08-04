@@ -428,7 +428,7 @@ export function AgentChat() {
           updatedAt: new Date().toISOString(),
         };
         // 先持久化用户消息，确保切换页面时对话不丢失
-        const result = await createChat([userMessage], title);
+        const result = await createChat([userMessage], title, chatId);
         if (result.success) {
           setChatHistory((prev) => [result.data, ...prev]);
         } else {
